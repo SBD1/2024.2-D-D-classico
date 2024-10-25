@@ -1,0 +1,7 @@
+site_name: D&D Clássico
+# site_url: Colocar lind da documentação
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
