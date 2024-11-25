@@ -1,0 +1,1 @@
+![Diagrama Entidade Relacionamento](/2024.2-D-D-classico/imagens/MER.drawio.png)

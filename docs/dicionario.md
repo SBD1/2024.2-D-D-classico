@@ -1,1 +1,1 @@
-dsdcsdkckds
+![Diagrama Entidade Relacionamento](/2024.2-D-D-classico/imagens/DER.drawio.png)
