@@ -1,9 +1,4 @@
-#Dicionario
-
-# Minha Tabela
-
-[Link do Dicionário de Dados](https://unbbr-my.sharepoint.com/:x:/g/personal/222031045_aluno_unb_br/ES8xZeEcO4tIvXaCuM7zY3QBk_8WT2InNlGAL-fkhvqtmg?e=M6tgvS)
-
+# Dicionário de Dados
 
 <img src="/2024.2-D-D-classico/imagens/dicionario/mundo.png" alt="Tabela Dicionário" width="600" />
 <img src="/2024.2-D-D-classico/imagens/dicionario/regiao.png" alt="Tabela Dicionário" width="600" />
@@ -32,3 +27,10 @@
 <img src="/2024.2-D-D-classico/imagens/dicionario/arma.png" alt="Tabela Dicionário" width="600" />
 <img src="/2024.2-D-D-classico/imagens/dicionario/sala_caminho.png" alt="Tabela Dicionário" width="600" />
 
+[Link do Dicionário de Dados](https://unbbr-my.sharepoint.com/:x:/g/personal/222031045_aluno_unb_br/ES8xZeEcO4tIvXaCuM7zY3QBk_8WT2InNlGAL-fkhvqtmg?e=M6tgvS)
+
+## Histórico de Versões
+
+|    Data    | Versão | Descrição | Autor |
+| :---: | :----: | :---: | :---: |
+| 25/11/2024 | 1.0 | Entrega da primeira versão | Todos os integrantes |
