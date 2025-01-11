@@ -33,6 +33,7 @@ CREATE TABLE IF NOT EXISTS Personagem (
     id_sala int NOT NULL,
     id_classe int NOT NULL,
     nome char(150) NOT NULL,
+    id_raca int NOT NULL,
     tipo_personagem ENUM('PC', 'Inimigo', 'Pacífico') NOT NULL,
     vida int NOT NULL,
     nivel int NOT NULL,
@@ -43,7 +44,8 @@ CREATE TABLE IF NOT EXISTS Personagem (
     constituicao int NOT NULL,
     sabedoria int NOT NULL,
     inteligencia int NOT NULL,
-     
+    gold int NOT NULL,
+    batalha_atual int ,
 );
 
 CREATE TABLE IF NOT EXISTS Mundo (
@@ -67,6 +69,7 @@ CREATE TABLE IF NOT EXISTS Loja (
 CREATE TABLE IF NOT EXISTS Inventario (
     id SERIAL PRIMARY KEY,
     id_pc int NOT NULL,
+    id_instancia_item int ,
     capacidade int NOT NULL
 );
 
@@ -83,12 +86,27 @@ CREATE TABLE IF NOT EXISTS Inst_Item (
     id_item int NOT NULL
 )
 
+CREATE TABLE IF NOT EXISTS Regristo_batalha (
+    id SERIAL PRIMARY KEY,
+    id_PC int NOT NULL,
+    id_Inimigo int NOT NULL,
+    id_sala int NOT NULL,
+    data_batalha TIMESTAMP default CURRENT_TIMESTAMP,
+)
+
+CREATE TABLE IF NOT EXISTS Raca (
+    id int NOT NULL,
+    nome int NOT NULL,
+    is_hostil bool NOT NULL default false,
+)
+
 CREATE TABLE IF NOT EXISTS Missao (
     id SERIAL PRIMARY KEY,
     recompensa int NOT NULL,
-    id_personagem int NOT NULL,
+    id_raca int NOT NULL,
     titulo char(100) NOT NULL,
-    objetivo char(500) NOT NULL
+    objetivo char(500) NOT NULL,
+    recompensa_gold int NOT NULL,
 )
 
 CREATE TABLE IF NOT EXISTS Item (
@@ -97,12 +115,12 @@ CREATE TABLE IF NOT EXISTS Item (
     tipo_item ENUM('Armadura', 'Arma', 'Consumivel') NOT NULL,
 )
 
-CREATE TABLE IF NOT EXISTS Derrota (
-    id_derrota int NOT NULL,
-    id_instancia_personagem int NOT NULL,
+CREATE TABLE IF NOT EXISTS Loot (
+    id SERIAL PRIMARY KEY,
     id_personagem int NOT NULL,
     drop_item int NOT NULL,
     qtd_xp int NOT NULL
+    recompensa_gold int NOT NULL,
 )
 
 CREATE TABLE IF NOT EXISTS Inst_Missao (
@@ -119,7 +137,7 @@ CREATE TABLE IF NOT EXISTS Dialogo (
 
 CREATE TABLE IF NOT EXISTS Armadura (
     id_item int NOT NULL PRIMARY KEY,
-    defesa int NOT NULL,
+    defesa int NOT NULL,a
     resistencia int NOT NULL,
     descricao varchar(500)
 )
@@ -151,9 +169,8 @@ ALTER TABLE Venda ADD CONSTRAINT "FK_10" FOREIGN KEY (id_loja) REFERENCES Loja (
 ALTER TABLE Venda ADD CONSTRAINT "FK_11" FOREIGN KEY (id_instancia_item) REFERENCES Inst_Item (id);
 ALTER TABLE Inst_Item ADD CONSTRAINT "FK_12" FOREIGN KEY (id_item) REFERENCES Item (id);
 ALTER TABLE Missao ADD CONSTRAINT "FK_13" FOREIGN KEY (recompensa) REFERENCES Inst_Item (id);
-ALTER TABLE Missao ADD CONSTRAINT "FK_14" FOREIGN KEY (id_personagem) REFERENCES Personagem (id);
-ALTER TABLE Derrota ADD CONSTRAINT "FK_15" PRIMARY KEY (id_derrota, id_instancia_personagem, id_personagem);
-ALTER TABLE Derrota ADD CONSTRAINT "FK_16" FOREIGN KEY (drop_item) REFERENCES Inst_Item (id);
+ALTER TABLE Missao ADD CONSTRAINT "FK_14" FOREIGN KEY (id_raca) REFERENCES Raca (id);
+ALTER TABLE Loot ADD CONSTRAINT "FK_16" FOREIGN KEY (drop_item) REFERENCES Inst_Item (id);
 ALTER TABLE Inst_Missao ADD CONSTRAINT "FK_17" FOREIGN KEY (missao) REFERENCES Missao (id);
 ALTER TABLE Inst_Missao ADD CONSTRAINT "FK_18" FOREIGN KEY (id_personagem) REFERENCES Personagem (id);
 ALTER TABLE Dialogo ADD CONSTRAINT "FK_19" FOREIGN KEY (missao) REFERENCES Missao (id);
@@ -162,3 +179,9 @@ ALTER TABLE Consumível ADD CONSTRAINT "FK_21" FOREIGN KEY (id_item) REFERENCES 
 ALTER TABLE Arma ADD CONSTRAINT "FK_22" FOREIGN KEY (id_item) REFERENCES Item (id);
 ALTER TABLE Sala_caminho ADD CONSTRAINT "FK_23" FOREIGN KEY (id_sala) REFERENCES Salas (id);
 ALTER TABLE Sala_caminho ADD CONSTRAINT "FK_24" FOREIGN KEY (id_caminho) REFERENCES Caminhos (id);
+ALTER TABLE Inventario ADD CONSTRAINT "FK_25" FOREIGN KEY (id_instancia_item) REFERENCES Inst_Item (id);
+ALTER TABLE Personagem ADD CONSTRAINT "FK_26" FOREIGN KEY (id_raca) REFERENCES Raca (id);
+ALTER TABLE Loot ADD CONSTRAINT "FK_27" FOREIGN KEY (id_personagem) REFERENCES Personagem(id);
+ALTER TABLE Regristo_batalha ADD CONSTRAINT "FK_28" FOREIGN KEY (id_PC) REFERENCES Personagem (id);
+ALTER TABLE Regristo_batalha ADD CONSTRAINT "FK_29" FOREIGN KEY (id_Inimigo) REFERENCES Personagem (id);
+ALTER TABLE Regristo_batalha ADD CONSTRAINT "FK_30" FOREIGN KEY (id_sala) REFERENCES Salas (id);
