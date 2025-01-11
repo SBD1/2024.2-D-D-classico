@@ -5,7 +5,7 @@
 -- Banco de Dados .........: PostgreSQL                                                --
 -- Descricao .........: Inclusão de CREATE TABLE de todas as tabelas do banco de dados.--
 -- --------------------------------------------------------------------------------------
--- | Atualizacao : 10/08/2025 | Autor(es): Ciro Costa                           |      --
+-- | Atualizacao : 10/01/2025 | Autor(es): Ciro Costa                           |      --
 --                            | Descricao: Inclusão das linhas de CREATE TABLE  |      --
 -- --------------------------------------------------------------------------------------
 
@@ -90,6 +90,38 @@ CREATE TABLE IF NOT EXISTS Missao (
     objetivo char(500) NOT NULL
 )
 
+CREATE TABLE IF NOT EXISTS Item (
+    id SERIAL PRIMARY KEY,
+    nome char(100) NOT NULL,
+    tipo_item char(1) NOT NULL
+)
+
+CREATE TABLE IF NOT EXISTS Derrota (
+    id_derrota int NOT NULL,
+    id_instancia_personagem int NOT NULL,
+    id_personagem int NOT NULL,
+    drop_item int NOT NULL,
+    qtd_xp int NOT NULL
+)
+
+CREATE TABLE IF NOT EXISTS Inst_Missao (
+    id SERIAL PRIMARY KEY,
+    missao int NOT NULL,
+    id_personagem int NOT NULL
+)
+
+CREATE TABLE IF NOT EXISTS Dialogo (
+    id SERIAL PRIMARY KEY,
+    missao int NOT NULL,
+    conteudo varchar(500)
+)
+
+CREATE TABLE IF NOT EXISTS Armadura (
+    id_item int NOT NULL PRIMARY KEY,
+    defesa int NOT NULL,
+    resistencia int NOT NULL,
+    descricao varchar(500)
+)
 
 -- Keys
 
@@ -107,5 +139,9 @@ ALTER TABLE Venda ADD CONSTRAINT "FK_11" FOREIGN KEY (id_instancia_item) REFEREN
 ALTER TABLE Inst_Item ADD CONSTRAINT "FK_12" FOREIGN KEY (id_item) REFERENCES Item (id);
 ALTER TABLE Missao ADD CONSTRAINT "FK_13" FOREIGN KEY (recompensa) REFERENCES Inst_Item (id);
 ALTER TABLE Missao ADD CONSTRAINT "FK_14" FOREIGN KEY (id_personagem) REFERENCES Personagem (id);
-
-
+ALTER TABLE Derrota ADD CONSTRAINT "FK_15" PRIMARY KEY (id_derrota, id_instancia_personagem, id_personagem);
+ALTER TABLE Derrota ADD CONSTRAINT "FK_16" FOREIGN KEY (drop_item) REFERENCES Inst_Item (id);
+ALTER TABLE Inst_Missao ADD CONSTRAINT "FK_17" FOREIGN KEY (missao) REFERENCES Missao (id);
+ALTER TABLE Inst_Missao ADD CONSTRAINT "FK_18" FOREIGN KEY (id_personagem) REFERENCES Personagem (id);
+ALTER TABLE Dialogo ADD CONSTRAINT "FK_19" FOREIGN KEY (missao) REFERENCES Missao (id);
+ALTER TABLE Armadura ADD CONSTRAINT "FK_20" FOREIGN KEY (id_item) REFERENCES Item (id);
