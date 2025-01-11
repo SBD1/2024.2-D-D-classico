@@ -1,5 +1,8 @@
-import { Client, Pool } from 'pg'
+import pg from 'pg'
 import 'dotenv/config'
+import chalk from 'chalk';
+
+const { Client, Pool } = pg;
 
 let client = new Client({
   host: process.env.DB_HOST,
@@ -27,7 +30,7 @@ client.on('error', (err) => {
   process.exit(1);
 })
 
-const retryConnection = async (): Promise<void> => {
+const retryConnection = async () => {
   let currentTry = 0;
   let numberTries = 3;
   let waitTime = 1000;
@@ -42,6 +45,9 @@ const retryConnection = async (): Promise<void> => {
       });
       console.warn(`Tentando conectar com banco de dados ${currentTry + 1}`);
       await client.connect()
+      console.log(chalk.green("Conexão sucessida"));
+
+      break;
     } catch (error) {
       currentTry++;
       if (currentTry >= numberTries) {
