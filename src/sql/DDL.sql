@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS Personagem (
     id_sala int NOT NULL,
     id_classe int NOT NULL,
     nome char(150) NOT NULL,
-    tipo_personagem char(1) NOT NULL,
+    tipo_personagem ENUM('PC', 'Inimigo', 'Pacífico') NOT NULL,
     vida int NOT NULL,
     nivel int NOT NULL,
     xp_base int NOT NULL DEFAULT 0,
