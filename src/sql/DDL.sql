@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS Personagem (
     sabedoria int NOT NULL,
     inteligencia int NOT NULL,
     gold int NOT NULL,
-    batalha_atual int ,
+   
 );
 
 CREATE TABLE IF NOT EXISTS Mundo (
