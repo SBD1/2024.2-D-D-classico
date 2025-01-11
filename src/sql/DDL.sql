@@ -123,6 +123,22 @@ CREATE TABLE IF NOT EXISTS Armadura (
     descricao varchar(500)
 )
 
+CREATE TABLE IF NOT EXISTS Consumível (
+    id_item int NOT NULL PRIMARY KEY,
+    Benefício int NOT NULL,
+    descricao varchar(500)
+)
+
+CREATE TABLE IF NOT EXISTS Arma (
+    id_item int NOT NULL PRIMARY KEY,
+    Dano int NOT NULL,
+    descricao varchar(500)
+)
+CREATE TABLE IF NOT EXISTS Sala_caminho (
+    id_sala int NOT NULL,
+    id_caminho int NOT NULL,
+)
+
 -- Keys
 
 ALTER TABLE Salas ADD CONSTRAINT "FK_01" FOREIGN KEY (id_regiao) REFERENCES Regiao (id);
@@ -145,3 +161,7 @@ ALTER TABLE Inst_Missao ADD CONSTRAINT "FK_17" FOREIGN KEY (missao) REFERENCES M
 ALTER TABLE Inst_Missao ADD CONSTRAINT "FK_18" FOREIGN KEY (id_personagem) REFERENCES Personagem (id);
 ALTER TABLE Dialogo ADD CONSTRAINT "FK_19" FOREIGN KEY (missao) REFERENCES Missao (id);
 ALTER TABLE Armadura ADD CONSTRAINT "FK_20" FOREIGN KEY (id_item) REFERENCES Item (id);
+ALTER TABLE Consumível ADD CONSTRAINT "FK_21" FOREIGN KEY (id_item) REFERENCES Item (id);
+ALTER TABLE Arma ADD CONSTRAINT "FK_22" FOREIGN KEY (id_item) REFERENCES Item (id);
+ALTER TABLE Sala_caminho ADD CONSTRAINT "FK_23" FOREIGN KEY (id_sala) REFERENCES Salas (id);
+ALTER TABLE Sala_caminho ADD CONSTRAINT "FK_24" FOREIGN KEY (id_caminho) REFERENCES Caminhos (id);
