@@ -135,10 +135,6 @@ CREATE TABLE IF NOT EXISTS Arma (
     Dano int NOT NULL,
     descricao varchar(500)
 )
-CREATE TABLE IF NOT EXISTS Sala_caminho (
-    id_sala int NOT NULL,
-    id_caminho int NOT NULL,
-)
 
 -- Keys
 
