@@ -1,6 +1,7 @@
 import pg from 'pg'
 import 'dotenv/config'
 import chalk from 'chalk';
+import { clearNLines } from './utils.js';
 
 const { Client, Pool } = pg;
 
@@ -9,6 +10,7 @@ let client = new Client({
   database: process.env.DB_DATABASE,
   port: +(process.env.DB_PORT ?? 5432),
   user: process.env.DB_USER,
+  query_timeout:5000,
   password: process.env.DB_PASSWORD
 })
 
@@ -17,6 +19,7 @@ const poolConection = new Pool({
   database: process.env.DB_DATABASE,
   port: +(process.env.DB_PORT ?? 5432),
   user: process.env.DB_USER,
+  query_timeout:5000,
   password: process.env.DB_PASSWORD
 });
 
@@ -45,7 +48,8 @@ const retryConnection = async () => {
       });
       console.warn(`Tentando conectar com banco de dados ${currentTry + 1}`);
       await client.connect()
-      console.log(chalk.green("Conexão sucessida"));
+      clearNLines();
+      console.log(chalk.green("Conexão sucedida"));
 
       break;
     } catch (error) {
@@ -78,8 +82,8 @@ export const transactions = async (executeFunction) => {
   const poolClient = await poolConection.connect();
 
   try {
-    await poolClient.query('BEGIN')
-    await executeFunction(poolClient.query);
+    await poolClient.query('BEGIN')    
+    await executeFunction(poolClient);
     await poolClient.query('COMMIT')
   } catch (e) {
     await poolClient.query('ROLLBACK')
