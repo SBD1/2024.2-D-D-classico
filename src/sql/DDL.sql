@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS Classe (
 CREATE TABLE IF NOT EXISTS Loja (
     id SERIAL PRIMARY KEY,
     dono int NOT NULL,
+    tipo ENUM('Amadureiro', 'Armeiro', 'Alquimista') NOT NULL,
     nome char(100) NOT NULL
 );
 
@@ -93,7 +94,7 @@ CREATE TABLE IF NOT EXISTS Missao (
 CREATE TABLE IF NOT EXISTS Item (
     id SERIAL PRIMARY KEY,
     nome char(100) NOT NULL,
-    tipo_item char(1) NOT NULL
+    tipo_item ENUM('Armadura', 'Arma', 'Consumivel') NOT NULL,
 )
 
 CREATE TABLE IF NOT EXISTS Derrota (
