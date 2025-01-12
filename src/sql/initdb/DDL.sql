@@ -68,6 +68,7 @@ CREATE TABLE IF NOT EXISTS Classe (
 
 CREATE TABLE IF NOT EXISTS Loja (
     id SERIAL PRIMARY KEY,
+    id_sala int NOT NULL,
     dono int NOT NULL,
     tipo tipo_loja_enum NOT NULL,
     nome char(100) NOT NULL
@@ -190,3 +191,5 @@ ALTER TABLE Loot ADD CONSTRAINT "FK_25" FOREIGN KEY (id_personagem) REFERENCES P
 ALTER TABLE Regristo_batalha ADD CONSTRAINT "FK_26" FOREIGN KEY (id_PC) REFERENCES Personagem (id);
 ALTER TABLE Regristo_batalha ADD CONSTRAINT "FK_27" FOREIGN KEY (id_Inimigo) REFERENCES Personagem (id);
 ALTER TABLE Regristo_batalha ADD CONSTRAINT "FK_28" FOREIGN KEY (id_sala) REFERENCES Salas (id);
+ALTER TABLE Loja_Loc ADD CONSTRAINT "FK_29" FOREIGN KEY (id_sala) REFERENCES Salas (id);
+
