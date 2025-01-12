@@ -1,10 +1,7 @@
 #! /usr/bin/env node
 
-import chalk from 'chalk';
-
 import {connect} from './db-connection.js';
-import { clearNLines, createProgressBar, sleep } from './utils.js';
-import { createDBTables, needCreateTable, needSeedTable, seedDBTables } from './sql-loader.js';
+import { needSeedTable, seedDBTables } from './sql-loader.js';
 import { select, input } from '@inquirer/prompts';
 // import inquirer from 'inquirer'; 
 // import gradient from 'gradient-string';
@@ -19,12 +16,8 @@ const welcome = async () => {
 
   
   await connect();
-  const needCreateTable = await needCreateTable();
-  if (condition) {
-    await createDBTables();
-  }
-  const needSeedTable = await needSeedTable();
-  if (needSeedTable) {
+  const needSeedTableBol = await needSeedTable();
+  if (needSeedTableBol) {
     await seedDBTables();
   }
   console.clear();
