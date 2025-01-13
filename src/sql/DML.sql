@@ -150,7 +150,28 @@ VALUES
     (7, 10, 'Machado pesado, utilizado por guerreiros para ataques devastadores.'),
     (8, 6, 'Cajado mágico usado por conjuradores para amplificar seus feitiços.');
 
-
+INSERT INTO Raca (id, nome, is_hostil) 
+VALUES
+(1, 'Humano', false),
+(2, 'Elfo', false),
+(3, 'Anão', false),
+(4, 'Halfling', false),
+(5, 'Gnomo', false),
+(6, 'Tiefling', false),
+(7, 'Dragonborn', false),
+(8, 'Meio-Orc', false),
+(9, 'Meio-Elfo', false),
+(10, 'Orc', true),
+(11, 'Goblin', true),
+(12, 'Kobold', true),
+(13, 'Hobgoblin', true),
+(14, 'Drow', true),
+(15, 'Tritão', false),
+(16, 'Aarakocra', false),
+(17, 'Genasi', false),
+(18, 'Tabaxi', false),
+(19, 'Firbolg', false),
+(20, 'Yuan-ti Pureblood', true);
 
 
 
