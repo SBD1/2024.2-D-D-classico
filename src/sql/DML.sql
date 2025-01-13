@@ -183,11 +183,6 @@ UPDATE Personagem
 SET xp_base = xp_base + ?
 WHERE id = ?;
 
--- Modifica o Status de um Personagem
-UPDATE Personagem
-SET status = ?
-WHERE id = ?;
-
 -- Atualiza o nível do personagem ao atingir certa quantidade de experiência.
 UPDATE Personagem
 SET nivel = nivel + ?
