@@ -158,4 +158,67 @@ VALUES
 
 UPDATE Personagem SET id_sala=? WHERE id=?;
 
+--Adiciona ou subtrai uma quantidade de gold do personagem
+UPDATE Personagem
+SET gold = gold + ?
+WHERE id = ?;
+
+-- Atualiza a vida de um personagem
+UPDATE Personagem
+SET vida = ?
+WHERE id = ?;
+
+-- Atualiza o preço de um item em uma loja
+UPDATE Venda
+SET preco = ?
+WHERE id_loja = ? AND id_instancia_item = ?;
+
+-- Atualiza a quantidade de itens de uma Venda
+UPDATE Venda
+SET quantidade = quantidade + ?
+WHERE id_loja = ? AND id_instancia_item = ?;
+
+--Incrementa a experiência do personagem após uma batalha ou missão concluída.
+UPDATE Personagem
+SET xp_base = xp_base + ?
+WHERE id = ?;
+
+-- Modifica o Status de um Personagem
+UPDATE Personagem
+SET status = ?
+WHERE id = ?;
+
+-- Atualiza o nível do personagem ao atingir certa quantidade de experiência.
+UPDATE Personagem
+SET nivel = nivel + ?
+WHERE id = ?;
+
+--Atualiza atributos dos Personagens
+UPDATE Personagem
+SET destreza = destreza + ?
+WHERE id = ?;
+
+UPDATE Personagem
+SET carisma = carisma + ?
+WHERE id = ?;
+
+UPDATE Personagem
+SET forca = forca + ?
+WHERE id = ?;
+
+UPDATE Personagem
+SET constituicao = constituicao + ?
+WHERE id = ?;
+
+UPDATE Personagem
+SET sabedoria = sabedoria + ?
+WHERE id = ?;
+
+UPDATE Personagem
+SET inteligencia = inteligencia + ?
+WHERE id = ?;
+
+
+
+
 -- DELETES --
