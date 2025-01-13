@@ -214,6 +214,12 @@ SET inteligencia = inteligencia + ?
 WHERE id = ?;
 
 
-
-
 -- DELETES --
+
+-- Remove um personagem do jogo
+DELETE FROM Personagem
+WHERE id = ?;
+
+-- Remove um item específico do inventário de um personagem
+DELETE FROM Inventario
+WHERE id_pc = ? AND id_instancia_item = ?;
