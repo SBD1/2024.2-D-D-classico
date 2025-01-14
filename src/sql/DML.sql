@@ -286,24 +286,24 @@ VALUES
     (68, 18, 4, 'Druida Protetor', 4, 'P', 60, 5, 0, 11, 12, 10, 10, 15, 14, 150);
 
 -- Dragões de Fogo
-    (69, 101, 10, 'Ignarion, o Caldeirão de Fogo', 7, 'Inimigo', 500, 20, 0, 15, 18, 25, 22, 14, 16, 10000),
-    (70, 102, 10, 'Pyrrhos, a Fúria Escaldante', 7, 'Inimigo', 450, 19, 0, 14, 17, 24, 21, 13, 15, 9500),
+    (69, 101, 10, 'Ignarion, o Caldeirão de Fogo', 7, 'I', 500, 20, 0, 15, 18, 25, 22, 14, 16, 10000),
+    (70, 102, 10, 'Pyrrhos, a Fúria Escaldante', 7, 'I', 450, 19, 0, 14, 17, 24, 21, 13, 15, 9500),
 
 -- Dragões de Gelo
-    (71, 103, 10, 'Glaciaris, o Inverno Eterno', 7, 'Inimigo', 480, 19, 0, 13, 16, 23, 20, 15, 14, 9000),
-    (72, 104, 10, 'Frostfang, o Devastador Ártico', 7, 'Inimigo', 470, 18, 0, 12, 15, 22, 21, 14, 15, 8500),
+    (71, 103, 10, 'Glaciaris, o Inverno Eterno', 7, 'I', 480, 19, 0, 13, 16, 23, 20, 15, 14, 9000),
+    (72, 104, 10, 'Frostfang, o Devastador Ártico', 7, 'I', 470, 18, 0, 12, 15, 22, 21, 14, 15, 8500),
 
 -- Dragões Negros
-    (73, 105, 10, 'Umbraxas, o Pesadelo Venenoso', 7, 'Inimigo', 510, 20, 0, 16, 19, 26, 23, 14, 17, 10500),
-    (74, 106, 10, 'Onyxion, o Terror Sombrio', 7, 'Inimigo', 490, 19, 0, 15, 18, 25, 22, 13, 16, 10000),
+    (73, 105, 10, 'Umbraxas, o Pesadelo Venenoso', 7, 'I', 510, 20, 0, 16, 19, 26, 23, 14, 17, 10500),
+    (74, 106, 10, 'Onyxion, o Terror Sombrio', 7, 'I', 490, 19, 0, 15, 18, 25, 22, 13, 16, 10000),
 
 -- Dragões de Ouro
-    (75, 107, 10, 'Aurelion, o Guardião das Chamas', 7, 'Inimigo', 520, 21, 0, 17, 20, 27, 24, 16, 18, 11000),
-    (76, 108, 10, 'Solaryn, o Luminar Dourado', 7, 'Inimigo', 500, 20, 0, 16, 19, 26, 23, 15, 17, 10500),
+    (75, 107, 10, 'Aurelion, o Guardião das Chamas', 7, 'I', 520, 21, 0, 17, 20, 27, 24, 16, 18, 11000),
+    (76, 108, 10, 'Solaryn, o Luminar Dourado', 7, 'I', 500, 20, 0, 16, 19, 26, 23, 15, 17, 10500),
 
 -- Dragões Verdes
-    (77, 109, 10, 'Verdantor, o Carrasco Esmeralda', 7, 'Inimigo', 490, 19, 0, 15, 18, 25, 22, 14, 16, 9500),
-    (78, 110, 10, 'Thalassor, o Guardião Verdejante', 7, 'Inimigo', 480, 18, 0, 14, 17, 24, 21, 13, 15, 9000);
+    (77, 109, 10, 'Verdantor, o Carrasco Esmeralda', 7, 'I', 490, 19, 0, 15, 18, 25, 22, 14, 16, 9500),
+    (78, 110, 10, 'Thalassor, o Guardião Verdejante', 7, 'I', 480, 18, 0, 14, 17, 24, 21, 13, 15, 9000);
 
 -- UPDATES --
 
