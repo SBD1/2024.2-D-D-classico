@@ -6,10 +6,23 @@ Um Diagrama Entidade-Relacionamento (DER) é uma representação visual de um mo
 
 ## DER do Dungeons & Dragons
 
-![Diagrama Entidade Relacionamento](/2024.2-D-D-classico/imagens/DER.drawio.png)
+Versão 2.0 do DER
+
+![Diagrama Entidade Relacionamento 2.0](/2024.2-D-D-classico/imagens/DER2.drawio.png)
+
+<details>
+<summary>Clique para ver a versão 1.0 do DER</summary>
+
+Versão apresentada no Módulo 1:
+
+<img src="/2024.2-D-D-classico/imagens/DER.drawio.png"/>
+
+</details>
+
 
 ## Histórico de Versões
 
 |    Data    | Versão | Descrição | Autor |
 | :---: | :----: | :---: | :---: |
 | 25/11/2024 | 1.0 | Entrega da primeira versão | Todos os integrantes |
+| 13/01/2025 | 1.0 | Entrega da segunda versão | Todos os integrantes |
