@@ -37,6 +37,12 @@ Repositório para o desenvolvimento do projeto do Dungeons & Dragons, na discipl
                     <h5 class="text-center">Matheus<br>Brant</h5>
                 </a>
             </td>
+            <td align="center">
+                <a href="https://github.com/vinialves2020">
+                    <img style="border-radius: 50%;" src="https://avatars.githubusercontent.com/u/69173517?v=4" width="150px;"/>
+                    <h5 class="text-center">Vinicius<br>Alves</h5>
+                </a>
+            </td>
     </table>
 
 </center>
