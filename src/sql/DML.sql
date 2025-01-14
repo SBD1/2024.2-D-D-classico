@@ -150,6 +150,21 @@ VALUES
     (7, 10, 'Machado pesado, utilizado por guerreiros para ataques devastadores.'),
     (8, 6, 'Cajado mágico usado por conjuradores para amplificar seus feitiços.');
 
+INSERT INTO Inst_Item (id, id_item)
+VALUES
+    (1, 8),
+    (2, 8),
+    (3, 8),
+    (4, 8);
+
+INSERT INTO Missao(id, recompensa, id_raca, titulo, objetivo, recompensa_gold)
+VALUES
+    (1, 1, 1, 'Dungeons e mate o dragon', 'Pelas vastas terras, ao longe, você avista um dragão, mate-o!', 500);
+
+INSERT INTO Inst_Missao(id, id_missao, id_personagem)
+VALUES  
+    (1, 1, 68);
+
 INSERT INTO Raca (id, nome, is_hostil) 
 VALUES
 (1, 'Humano', false),
