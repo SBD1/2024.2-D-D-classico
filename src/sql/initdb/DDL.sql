@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS Regristo_batalha (
 
 CREATE TABLE IF NOT EXISTS Raca (
     id SERIAL PRIMARY KEY,
-    nome int NOT NULL,
+    nome varchar(100) NOT NULL,
     is_hostil bool NOT NULL DEFAULT false
 );
 

@@ -3,6 +3,7 @@
 import {connect} from './db-connection.js';
 import { needSeedTable, seedDBTables } from './sql-loader.js';
 import { select, input } from '@inquirer/prompts';
+import {registerPlayer, getPlayerCurrentLocation, updatePlayerLocation} from './entities/personagem.entity.js'
 // import inquirer from 'inquirer'; 
 // import gradient from 'gradient-string';
 // import chalkAnimation from 'chalk-animation';
@@ -46,34 +47,44 @@ const mainMenu = async () => {
   }
 }
 
-const registerPlayer = async () => {
+const registerPlayerOption = async () => {
   const answer = await input({
     message:'Qual o nome do seu personagem',
     default:'Player',
     required:true
   });
   const pl = await registerPlayer(answer);
+  console.log("Seu player:");
+  for (const key of Object.keys(pl)) {
+    if (key !== "id") {
+        console.log(`${key} : ${pl[key]}`);
+    }
+  }
+  
   player = pl;
+
 }
 
 const walk = async () => {
- const outrasSalas = getPlayerCurrentLocation(player.id);
+ const outrasSalas = await getPlayerCurrentLocation(player.id);
+
  const answer = await select({
   message:"Salas disponíveis para mudar",
   choices:outrasSalas.map(i=>({
     name:i.nome,
-    val: i.id
+    value: i.id
   })),
  })
-
+ 
  await updatePlayerLocation(answer,player.id);
+ console.clear()
  walk();
 }
 
 
 await welcome();
 await mainMenu();
-await registerPlayer();
+await registerPlayerOption();
 await walk();
 
 
