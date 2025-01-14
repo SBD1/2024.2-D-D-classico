@@ -190,7 +190,7 @@ INSERT INTO Classe (id, nome, bonus, tipo) VALUES
 INSERT INTO Personagem (id, id_sala, id_classe, nome, id_raca, tipo_personagem, vida, nivel, xp_base, destreza, carisma, forca, constituicao, sabedoria, inteligencia, gold) 
 VALUES 
 
---Inimigos
+-- Inimigos
 (1, 3, 9, 'Ladrão Kobold', 12, 'I', 40, 4, 0, 14, 10, 8, 8, 10, 12, 30),
 (2, 4, 11, 'Necromante Orc', 10, 'I', 60, 7, 0, 11, 9, 11, 11, 13, 17, 70),
 (3, 5, 1, 'Bárbaro Troll', 8, 'I', 100, 8, 0, 9, 6, 18, 16, 7, 8, 120),
@@ -249,6 +249,46 @@ VALUES
 (56, 13, 3, 'Clérigo dos Cânticos Sagrados', 6, 'I', 60, 6, 0, 10, 12, 8, 11, 15, 16, 80),
 (57, 14, 4, 'Druida dos Sons da Natureza', 16, 'I', 75, 7, 0, 11, 11, 10, 12, 17, 13, 85),
 (58, 15, 1, 'Bárbaro da Batida Tribal', 7, 'I', 95, 8, 0, 10, 8, 18, 15, 7, 9, 125);
+
+-- Donos das lojas em Águas Profundas
+(59, 15, 5, 'Tharion, o Mestre do Couro', 3, 'P', 60, 5, 0, 10, 14, 12, 10, 12, 10, 200), -- Amadureiro
+(60, 16, 6, 'Kael, o Forjador', 4, 'P', 80, 7, 0, 11, 10, 15, 14, 12, 9, 300);          -- Armeiro
+
+-- Donos das lojas em Baldur’s Gate
+(61, 17, 7, 'Lorien, o Viajante', 2, 'P', 50, 4, 0, 12, 13, 10, 10, 11, 14, 150),       -- Amadureiro
+(62, 18, 8, 'Arwyn, o Alquimista', 6, 'P', 55, 6, 0, 11, 12, 9, 10, 13, 15, 250);        -- Alquimista
+
+-- Donos das lojas em Neverwinter
+(63, 19, 9, 'Darian, o Ferreiro', 5, 'P', 75, 6, 0, 10, 9, 14, 13, 10, 11, 300),        -- Armeiro
+(64, 20, 10, 'Elyra, a Mística', 11, 'P', 65, 5, 0, 12, 14, 8, 10, 12, 16, 400);        -- Alquimista
+
+-- Donos das lojas em Silverymoon
+(65, 21, 11, 'Nerion, o Caçador de Tesouros', 8, 'P', 70, 6, 0, 13, 12, 12, 11, 12, 15, 350), -- Amadureiro
+(66, 22, 12, 'Vaylin, o Espadachim', 9, 'P', 85, 7, 0, 10, 11, 16, 14, 10, 10, 500);          -- Armeiro
+
+-- Personagens pacíficos
+(67, 16, 2, 'Bardo Alegre', 2, 'P', 40, 4, 0, 10, 14, 8, 9, 12, 13, 200),
+(68, 18, 4, 'Druida Protetor', 4, 'P', 60, 5, 0, 11, 12, 10, 10, 15, 14, 150);
+
+-- Dragões de Fogo
+(69, 101, 10, 'Ignarion, o Caldeirão de Fogo', 7, 'Inimigo', 500, 20, 0, 15, 18, 25, 22, 14, 16, 10000),
+(70, 102, 10, 'Pyrrhos, a Fúria Escaldante', 7, 'Inimigo', 450, 19, 0, 14, 17, 24, 21, 13, 15, 9500),
+
+-- Dragões de Gelo
+(71, 103, 10, 'Glaciaris, o Inverno Eterno', 7, 'Inimigo', 480, 19, 0, 13, 16, 23, 20, 15, 14, 9000),
+(72, 104, 10, 'Frostfang, o Devastador Ártico', 7, 'Inimigo', 470, 18, 0, 12, 15, 22, 21, 14, 15, 8500),
+
+-- Dragões Negros
+(73, 105, 10, 'Umbraxas, o Pesadelo Venenoso', 7, 'Inimigo', 510, 20, 0, 16, 19, 26, 23, 14, 17, 10500),
+(74, 106, 10, 'Onyxion, o Terror Sombrio', 7, 'Inimigo', 490, 19, 0, 15, 18, 25, 22, 13, 16, 10000),
+
+-- Dragões de Ouro
+(75, 107, 10, 'Aurelion, o Guardião das Chamas', 7, 'Inimigo', 520, 21, 0, 17, 20, 27, 24, 16, 18, 11000),
+(76, 108, 10, 'Solaryn, o Luminar Dourado', 7, 'Inimigo', 500, 20, 0, 16, 19, 26, 23, 15, 17, 10500),
+
+-- Dragões Verdes
+(77, 109, 10, 'Verdantor, o Carrasco Esmeralda', 7, 'Inimigo', 490, 19, 0, 15, 18, 25, 22, 14, 16, 9500),
+(78, 110, 10, 'Thalassor, o Guardião Verdejante', 7, 'Inimigo', 480, 18, 0, 14, 17, 24, 21, 13, 15, 9000);
 
 -- UPDATES --
 
