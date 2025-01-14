@@ -64,3 +64,4 @@
 |    Data    | Versão | Descrição | Autor |
 | :---: | :----: | :---: | :---: |
 | 25/11/2024 | 1.0 | Entrega da primeira versão | Todos os integrantes |
+| 13/01/2025 | 1.0 | Entrega da segunda versão | Todos os integrantes |

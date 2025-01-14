@@ -4,7 +4,7 @@ repo_url: https://github.com/SBD1/2024.2-D-D-classico
 
 nav:
   - Home: 'index.md'
-  - Módulo 1:
+  - Dungeons & Dragons:
     - Diagrama Entidade Relacionamento: 'DER.md'
     - Modelo Entidade Relacionamento: 'MER.md'
     - Dicionário: 'dicionario.md'
