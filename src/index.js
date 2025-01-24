@@ -4,6 +4,7 @@ import {connect} from './db-connection.js';
 import { needSeedTable, seedDBTables } from './sql-loader.js';
 import { select, input } from '@inquirer/prompts';
 import {registerPlayer, getPlayerCurrentLocation, updatePlayerLocation} from './entities/personagem.entity.js'
+import taskQueue from './action-queue.js';
 // import inquirer from 'inquirer'; 
 // import gradient from 'gradient-string';
 // import chalkAnimation from 'chalk-animation';
@@ -43,7 +44,9 @@ const mainMenu = async () => {
 
   if (answer === 'exit') {
     console.log("Saindo");
-    process.emit(0);
+    process.exit(0);
+  } else {
+    taskQueue.enqueue(registerPlayerOption)
   }
 }
 
@@ -62,7 +65,7 @@ const registerPlayerOption = async () => {
   }
   
   player = pl;
-
+  taskQueue.enqueue(walk)
 }
 
 const walk = async () => {
@@ -78,14 +81,27 @@ const walk = async () => {
  
  await updatePlayerLocation(answer,player.id);
  console.clear()
- walk();
+ taskQueue.enqueue(walk);
 }
 
 
 await welcome();
-await mainMenu();
-await registerPlayerOption();
-await walk();
+taskQueue.enqueue(mainMenu);
+// main loop
+while(true) {
+  try {
+    const currentFunction = taskQueue.dequeue();
+    if (!currentFunction) {
+      taskQueue.enqueue(mainMenu);
+    } else {
+      await currentFunction();
+    }
+  } catch (error) {    
+    console.error("A aplicação encontrou um erro")
+    process.exit(1);
+  }
+}
+
 
 
 
