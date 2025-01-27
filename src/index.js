@@ -14,7 +14,8 @@ import taskQueue from './action-queue.js';
 let player;
 
 const welcome = async () => {
-  console.log('Bem vindo ao D&D classico\n');
+  console.log(`Bem vindo ao D&D classico
+    (use as setas para navegar e enter para selecionar)`);
 
   
   await connect();
