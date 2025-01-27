@@ -88,6 +88,146 @@ VALUES
     (19, 20), -- Palácio de Neverember -> Forja dos Mestres
     (21, 22); -- Torre da Lua -> Biblioteca Mística
 
+INSERT INTO Raca (id, nome, is_hostil) 
+VALUES
+    (1, 'Humano', false),
+    (2, 'Elfo', false),
+    (3, 'Anão', false),
+    (4, 'Halfling', false),
+    (5, 'Gnomo', false),
+    (6, 'Tiefling', false),
+    (7, 'Dragonborn', false),
+    (8, 'Meio-Orc', false),
+    (9, 'Meio-Elfo', false),
+    (10, 'Orc', true),
+    (11, 'Goblin', true),
+    (12, 'Kobold', true),
+    (13, 'Hobgoblin', true),
+    (14, 'Drow', true),
+    (15, 'Tritão', false),
+    (16, 'Aarakocra', false),
+    (17, 'Genasi', false),
+    (18, 'Tabaxi', false),
+    (19, 'Firbolg', false),
+    (20, 'Yuan-ti Pureblood', true);
+
+INSERT INTO Classe (id, nome, bonus, tipo) VALUES
+    (1, 'Bárbaro', 3, 'B'),
+    (2, 'Bardo', 2, 'B'),
+    (3, 'Clérigo', 3, 'C'),
+    (4, 'Druida', 2, 'D'),
+    (5, 'Guerreiro', 4, 'G'),
+    (6, 'Monge', 3, 'M'),
+    (7, 'Paladino', 3, 'P'),
+    (8, 'Patrulheiro', 3, 'P'),
+    (9, 'Ladino', 2, 'L'),
+    (10, 'Feiticeiro', 4, 'F'),
+    (11, 'Bruxo', 4, 'B'),
+    (12, 'Mago', 5, 'M');
+
+INSERT INTO Personagem (id_sala, id_classe, nome, id_raca, tipo_personagem, vida, nivel, xp_base, destreza, carisma, forca, constituicao, sabedoria, inteligencia, gold) 
+VALUES 
+
+-- Inimigos
+    (3, 9, 'Ladrão Kobold', 12, 'Inimigo', 40, 4, 0, 14, 10, 8, 8, 10, 12, 30),
+    (4, 11, 'Necromante Orc', 10, 'Inimigo', 60, 7, 0, 11, 9, 11, 11, 13, 17, 70),
+    (5, 1, 'Bárbaro Troll', 8, 'Inimigo', 100, 8, 0, 9, 6, 18, 16, 7, 8, 120),
+    (6, 9, 'Assassino Drow', 14, 'Inimigo', 55, 6, 0, 15, 11, 10, 9, 12, 14, 80),
+    (7, 8, 'Arqueiro Goblin', 11, 'Inimigo', 45, 5, 0, 13, 9, 7, 8, 11, 13, 40),
+    (8, 3, 'Xamã Gnoll', 12, 'Inimigo', 65, 7, 0, 12, 8, 10, 10, 15, 16, 60),
+    (9, 5, 'Cavaleiro Morto-Vivo', 19, 'Inimigo', 90, 8, 0, 10, 7, 16, 14, 9, 12, 100),
+    (10, 7, 'Senhor Demônio', 20, 'Inimigo', 120, 10, 0, 9, 8, 20, 18, 8, 18, 150),
+    (11, 10, 'Mago do Fogo Infernal', 20, 'Inimigo', 70, 7, 0, 12, 14, 9, 10, 11, 18, 90),
+    (12, 3, 'Clérigo das Chamas Eternas', 6, 'Inimigo', 60, 6, 0, 10, 12, 8, 11, 15, 16, 80),
+    (13, 7, 'Paladino da Fúria Infernal', 8, 'Inimigo', 100, 8, 0, 9, 13, 15, 14, 9, 10, 120),
+    (14, 5, 'Guerreiro Demoníaco', 20, 'Inimigo', 85, 7, 0, 11, 10, 17, 13, 8, 9, 110),
+    (1, 8, 'Arqueiro das Chamas', 11, 'Inimigo', 65, 6, 0, 14, 9, 10, 10, 12, 15, 75),
+    (2, 4, 'Druida do Inferno Ardente', 17, 'Inimigo', 75, 7, 0, 12, 11, 9, 12, 16, 14, 85),
+    (3, 2, 'Bardo das Chamas Dançantes', 9, 'Inimigo', 50, 5, 0, 13, 15, 8, 9, 12, 17, 60),
+    (4, 1, 'Bárbaro do Fogo', 7, 'Inimigo', 110, 9, 0, 10, 8, 18, 15, 7, 8, 130),
+    (5, 6, 'Monge das Cinzas', 10, 'Inimigo', 55, 5, 0, 15, 10, 9, 11, 13, 16, 70),
+    (6, 11, 'Bruxo do Inferno', 6, 'Inimigo', 80, 8, 0, 12, 14, 11, 10, 13, 18, 100),
+    (7, 10, 'Mago do Gelo Eterno', 17, 'Inimigo', 65, 7, 0, 11, 13, 8, 10, 14, 18, 85),
+    (8, 3, 'Clérigo das Nevascas', 6, 'Inimigo', 70, 6, 0, 9, 11, 9, 12, 16, 15, 90),
+    (9, 7, 'Paladino da Geada', 15, 'Inimigo', 95, 8, 0, 10, 12, 14, 13, 9, 11, 115),
+    (10, 5, 'Guerreiro Congelante', 19, 'Inimigo', 80, 7, 0, 12, 10, 16, 12, 10, 12, 105),
+    (11, 8, 'Arqueiro das Neves', 11, 'Inimigo', 60, 6, 0, 14, 8, 9, 9, 13, 14, 70),
+    (12, 4, 'Druida do Inverno', 16, 'Inimigo', 75, 7, 0, 11, 10, 10, 13, 17, 13, 80),
+    (13, 2, 'Bardo da Geleira', 9, 'Inimigo', 55, 5, 0, 12, 14, 7, 10, 15, 16, 65),
+    (14, 1, 'Bárbaro da Tundra', 7, 'Inimigo', 105, 9, 0, 10, 7, 17, 14, 8, 9, 125),
+    (1, 6, 'Monge da Neve', 10, 'Inimigo', 50, 5, 0, 14, 9, 8, 10, 12, 15, 60),
+    (2, 11, 'Bruxo do Gelo Negro', 6, 'Inimigo', 75, 8, 0, 11, 13, 10, 11, 14, 18, 95);
+    (1, 8, 'Ladrão das Sombras', 12, 'Inimigo', 45, 5, 0, 14, 10, 9, 9, 11, 13, 35),
+    (2, 11, 'Feiticeiro do Submundo', 10, 'Inimigo', 60, 7, 0, 10, 12, 10, 11, 14, 16, 80),
+    (3, 9, 'Assassino Noturno', 14, 'Inimigo', 55, 6, 0, 16, 9, 11, 10, 13, 14, 75),
+    (4, 6, 'Monge das Trevas', 11, 'Inimigo', 50, 5, 0, 14, 8, 10, 9, 12, 15, 70),
+    (5, 7, 'Paladino das Profundezas', 8, 'Inimigo', 100, 8, 0, 9, 13, 15, 14, 9, 10, 120),
+    (6, 3, 'Clérigo dos Mortos', 6, 'Inimigo', 60, 6, 0, 9, 11, 8, 12, 16, 15, 90),
+    (7, 1, 'Bárbaro das Catacumbas', 7, 'Inimigo', 110, 9, 0, 10, 7, 18, 15, 7, 8, 130),
+    (8, 4, 'Druida da Escuridão', 17, 'Inimigo', 75, 7, 0, 11, 10, 9, 12, 16, 14, 85),
+    (9, 5, 'Guerreiro Subterrâneo', 19, 'Inimigo', 85, 7, 0, 12, 9, 17, 13, 8, 10, 110),
+    (10, 2, 'Bardo dos Sepulcros', 9, 'Inimigo', 50, 5, 0, 13, 12, 8, 9, 12, 16, 65),
+    (11, 10, 'Mago das Sombras', 20, 'Inimigo', 70, 7, 0, 12, 13, 9, 10, 11, 18, 90),
+    (12, 3, 'Clérigo das Trevas Eternas', 6, 'Inimigo', 60, 6, 0, 10, 11, 8, 11, 15, 16, 80),
+    (13, 8, 'Arqueiro do Crepúsculo', 11, 'Inimigo', 65, 6, 0, 14, 9, 10, 10, 12, 15, 75),
+    (14, 7, 'Paladino da Noite Eterna', 15, 'Inimigo', 95, 8, 0, 10, 12, 14, 13, 9, 11, 115),
+    (15, 5, 'Guerreiro das Trevas', 19, 'Inimigo', 80, 7, 0, 11, 9, 16, 12, 10, 12, 105);
+    (1, 9, 'Bardo Melódico', 9, 'Inimigo', 50, 5, 0, 12, 15, 8, 10, 14, 16, 60),
+    (2, 2, 'Cantor Encantador', 12, 'Inimigo', 45, 4, 0, 11, 14, 7, 9, 13, 15, 55),
+    (3, 3, 'Clérigo do Coral Celestial', 6, 'Inimigo', 65, 6, 0, 10, 13, 9, 11, 16, 15, 80),
+    (4, 1, 'Bárbaro do Ritmo Selvagem', 7, 'Inimigo', 90, 8, 0, 10, 9, 17, 14, 8, 9, 110),
+    (5, 4, 'Druida da Harmonia Natural', 17, 'Inimigo', 70, 7, 0, 12, 11, 9, 12, 16, 14, 85),
+    (6, 5, 'Guerreiro das Notas Agudas', 19, 'Inimigo', 85, 7, 0, 11, 10, 16, 13, 9, 12, 100),
+    (7, 8, 'Arqueiro das Melodias', 11, 'Inimigo', 55, 5, 0, 14, 12, 8, 10, 13, 14, 75),
+    (8, 11, 'Feiticeiro do Som', 10, 'Inimigo', 60, 7, 0, 11, 13, 10, 11, 14, 16, 80),
+    (9, 7, 'Paladino da Canção Sagrada', 15, 'Inimigo', 100, 8, 0, 10, 14, 15, 14, 9, 11, 120),
+    (10, 6, 'Monge dos Ecos Eternos', 10, 'Inimigo', 50, 5, 0, 14, 12, 9, 10, 12, 16, 70),
+    (11, 10, 'Mago da Sinfonia Arcana', 20, 'Inimigo', 75, 7, 0, 12, 14, 9, 10, 11, 18, 95),
+    (12, 2, 'Cantor dos Encantos', 9, 'Inimigo', 55, 5, 0, 13, 15, 8, 9, 12, 17, 65),
+    (13, 3, 'Clérigo dos Cânticos Sagrados', 6, 'Inimigo', 60, 6, 0, 10, 12, 8, 11, 15, 16, 80),
+    (14, 4, 'Druida dos Sons da Natureza', 16, 'Inimigo', 75, 7, 0, 11, 11, 10, 12, 17, 13, 85),
+    (15, 1, 'Bárbaro da Batida Tribal', 7, 'Inimigo', 95, 8, 0, 10, 8, 18, 15, 7, 9, 125);
+
+-- Donos das lojas em Águas Profundas
+    ( 15, 5, 'Tharion, o Mestre do Couro', 3, 'Pacífico', 60, 5, 0, 10, 14, 12, 10, 12, 10, 200), -- Amadureiro
+    ( 16, 6, 'Kael, o Forjador', 4, 'Pacífico', 80, 7, 0, 11, 10, 15, 14, 12, 9, 300);          -- Armeiro
+
+-- Donos das lojas em Baldur’s Gate
+    ( 17, 7, 'Lorien, o Viajante', 2, 'Pacífico', 50, 4, 0, 12, 13, 10, 10, 11, 14, 150),       -- Amadureiro
+    ( 18, 8, 'Arwyn, o Alquimista', 6, 'Pacífico', 55, 6, 0, 11, 12, 9, 10, 13, 15, 250);        -- Alquimista
+
+-- Donos das lojas em Neverwinter
+    (19, 9, 'Darian, o Ferreiro', 5, 'Pacífico', 75, 6, 0, 10, 9, 14, 13, 10, 11, 300),        -- Armeiro
+    (20, 10, 'Elyra, a Mística', 11, 'Pacífico', 65, 5, 0, 12, 14, 8, 10, 12, 16, 400);        -- Alquimista
+
+-- Donos das lojas em Silverymoon
+    ( 21, 11, 'Nerion, o Caçador de Tesouros', 8, 'Pacífico', 70, 6, 0, 13, 12, 12, 11, 12, 15, 350), -- Amadureiro
+    ( 22, 12, 'Vaylin, o Espadachim', 9, 'Pacífico', 85, 7, 0, 10, 11, 16, 14, 10, 10, 500);          -- Armeiro
+
+-- Personagens pacíficos
+    ( 16, 2, 'Bardo Alegre', 2, 'Pacífico', 40, 4, 0, 10, 14, 8, 9, 12, 13, 200),
+    ( 18, 4, 'Druida Protetor', 4, 'Pacífico', 60, 5, 0, 11, 12, 10, 10, 15, 14, 150);
+
+-- Dragões de Fogo
+    ( 101, 10, 'Ignarion, o Caldeirão de Fogo', 7, 'Inimigo', 500, 20, 0, 15, 18, 25, 22, 14, 16, 10000),
+    ( 102, 10, 'Pyrrhos, a Fúria Escaldante', 7, 'Inimigo', 450, 19, 0, 14, 17, 24, 21, 13, 15, 9500),
+
+-- Dragões de Gelo
+    (103, 10, 'Glaciaris, o Inverno Eterno', 7, 'Inimigo', 480, 19, 0, 13, 16, 23, 20, 15, 14, 9000),
+    (104, 10, 'Frostfang, o Devastador Ártico', 7, 'Inimigo', 470, 18, 0, 12, 15, 22, 21, 14, 15, 8500),
+
+-- Dragões Negros
+    (105, 10, 'Umbraxas, o Pesadelo Venenoso', 7, 'Inimigo', 510, 20, 0, 16, 19, 26, 23, 14, 17, 10500),
+    (106, 10, 'Onyxion, o Terror Sombrio', 7, 'Inimigo', 490, 19, 0, 15, 18, 25, 22, 13, 16, 10000),
+
+-- Dragões de Ouro
+    (107, 10, 'Aurelion, o Guardião das Chamas', 7, 'Inimigo', 520, 21, 0, 17, 20, 27, 24, 16, 18, 11000),
+    (108, 10, 'Solaryn, o Luminar Dourado', 7, 'Inimigo', 500, 20, 0, 16, 19, 26, 23, 15, 17, 10500),
+
+-- Dragões Verdes
+    (109, 10, 'Verdantor, o Carrasco Esmeralda', 7, 'Inimigo', 490, 19, 0, 15, 18, 25, 22, 14, 16, 9500),
+    (110, 10, 'Thalassor, o Guardião Verdejante', 7, 'Inimigo', 480, 18, 0, 14, 17, 24, 21, 13, 15, 9000);
+
 INSERT INTO Loja (dono, tipo, nome, id_sala)
 VALUES
 -- Lojas em Águas Profundas
@@ -161,149 +301,9 @@ INSERT INTO Missao(id, recompensa, id_raca, titulo, objetivo, recompensa_gold)
 VALUES
     (1, 1, 1, 'Dungeons e mate o dragon', 'Pelas vastas terras, ao longe, você avista um dragão, mate-o!', 500);
 
-INSERT INTO Inst_Missao(id, id_missao, id_personagem)
+INSERT INTO Inst_Missao(id, missao, id_personagem)
 VALUES  
-    (1, 1, 68);
-
-INSERT INTO Raca (id, nome, is_hostil) 
-VALUES
-    (1, 'Humano', false),
-    (2, 'Elfo', false),
-    (3, 'Anão', false),
-    (4, 'Halfling', false),
-    (5, 'Gnomo', false),
-    (6, 'Tiefling', false),
-    (7, 'Dragonborn', false),
-    (8, 'Meio-Orc', false),
-    (9, 'Meio-Elfo', false),
-    (10, 'Orc', true),
-    (11, 'Goblin', true),
-    (12, 'Kobold', true),
-    (13, 'Hobgoblin', true),
-    (14, 'Drow', true),
-    (15, 'Tritão', false),
-    (16, 'Aarakocra', false),
-    (17, 'Genasi', false),
-    (18, 'Tabaxi', false),
-    (19, 'Firbolg', false),
-    (20, 'Yuan-ti Pureblood', true);
-
-INSERT INTO Classe (id, nome, bonus, tipo) VALUES
-    (1, 'Bárbaro', 3, 'B'),
-    (2, 'Bardo', 2, 'B'),
-    (3, 'Clérigo', 3, 'C'),
-    (4, 'Druida', 2, 'D'),
-    (5, 'Guerreiro', 4, 'G'),
-    (6, 'Monge', 3, 'M'),
-    (7, 'Paladino', 3, 'P'),
-    (8, 'Patrulheiro', 3, 'P'),
-    (9, 'Ladino', 2, 'L'),
-    (10, 'Feiticeiro', 4, 'F'),
-    (11, 'Bruxo', 4, 'B'),
-    (12, 'Mago', 5, 'M');
-
-INSERT INTO Personagem (id, id_sala, id_classe, nome, id_raca, tipo_personagem, vida, nivel, xp_base, destreza, carisma, forca, constituicao, sabedoria, inteligencia, gold) 
-VALUES 
-
--- Inimigos
-    (1, 3, 9, 'Ladrão Kobold', 12, 'I', 40, 4, 0, 14, 10, 8, 8, 10, 12, 30),
-    (2, 4, 11, 'Necromante Orc', 10, 'I', 60, 7, 0, 11, 9, 11, 11, 13, 17, 70),
-    (3, 5, 1, 'Bárbaro Troll', 8, 'I', 100, 8, 0, 9, 6, 18, 16, 7, 8, 120),
-    (4, 6, 9, 'Assassino Drow', 14, 'I', 55, 6, 0, 15, 11, 10, 9, 12, 14, 80),
-    (5, 7, 8, 'Arqueiro Goblin', 11, 'I', 45, 5, 0, 13, 9, 7, 8, 11, 13, 40),
-    (6, 8, 3, 'Xamã Gnoll', 12, 'I', 65, 7, 0, 12, 8, 10, 10, 15, 16, 60),
-    (7, 9, 5, 'Cavaleiro Morto-Vivo', 19, 'I', 90, 8, 0, 10, 7, 16, 14, 9, 12, 100),
-    (8, 10, 7, 'Senhor Demônio', 20, 'I', 120, 10, 0, 9, 8, 20, 18, 8, 18, 150),
-    (9, 11, 10, 'Mago do Fogo Infernal', 20, 'I', 70, 7, 0, 12, 14, 9, 10, 11, 18, 90),
-    (10, 12, 3, 'Clérigo das Chamas Eternas', 6, 'I', 60, 6, 0, 10, 12, 8, 11, 15, 16, 80),
-    (11, 13, 7, 'Paladino da Fúria Infernal', 8, 'I', 100, 8, 0, 9, 13, 15, 14, 9, 10, 120),
-    (12, 14, 5, 'Guerreiro Demoníaco', 20, 'I', 85, 7, 0, 11, 10, 17, 13, 8, 9, 110),
-    (13, 1, 8, 'Arqueiro das Chamas', 11, 'I', 65, 6, 0, 14, 9, 10, 10, 12, 15, 75),
-    (14, 2, 4, 'Druida do Inferno Ardente', 17, 'I', 75, 7, 0, 12, 11, 9, 12, 16, 14, 85),
-    (15, 3, 2, 'Bardo das Chamas Dançantes', 9, 'I', 50, 5, 0, 13, 15, 8, 9, 12, 17, 60),
-    (16, 4, 1, 'Bárbaro do Fogo', 7, 'I', 110, 9, 0, 10, 8, 18, 15, 7, 8, 130),
-    (17, 5, 6, 'Monge das Cinzas', 10, 'I', 55, 5, 0, 15, 10, 9, 11, 13, 16, 70),
-    (18, 6, 11, 'Bruxo do Inferno', 6, 'I', 80, 8, 0, 12, 14, 11, 10, 13, 18, 100),
-    (19, 7, 10, 'Mago do Gelo Eterno', 17, 'I', 65, 7, 0, 11, 13, 8, 10, 14, 18, 85),
-    (20, 8, 3, 'Clérigo das Nevascas', 6, 'I', 70, 6, 0, 9, 11, 9, 12, 16, 15, 90),
-    (21, 9, 7, 'Paladino da Geada', 15, 'I', 95, 8, 0, 10, 12, 14, 13, 9, 11, 115),
-    (22, 10, 5, 'Guerreiro Congelante', 19, 'I', 80, 7, 0, 12, 10, 16, 12, 10, 12, 105),
-    (23, 11, 8, 'Arqueiro das Neves', 11, 'I', 60, 6, 0, 14, 8, 9, 9, 13, 14, 70),
-    (24, 12, 4, 'Druida do Inverno', 16, 'I', 75, 7, 0, 11, 10, 10, 13, 17, 13, 80),
-    (25, 13, 2, 'Bardo da Geleira', 9, 'I', 55, 5, 0, 12, 14, 7, 10, 15, 16, 65),
-    (26, 14, 1, 'Bárbaro da Tundra', 7, 'I', 105, 9, 0, 10, 7, 17, 14, 8, 9, 125),
-    (27, 1, 6, 'Monge da Neve', 10, 'I', 50, 5, 0, 14, 9, 8, 10, 12, 15, 60),
-    (28, 2, 11, 'Bruxo do Gelo Negro', 6, 'I', 75, 8, 0, 11, 13, 10, 11, 14, 18, 95);
-    (29, 1, 8, 'Ladrão das Sombras', 12, 'I', 45, 5, 0, 14, 10, 9, 9, 11, 13, 35),
-    (30, 2, 11, 'Feiticeiro do Submundo', 10, 'I', 60, 7, 0, 10, 12, 10, 11, 14, 16, 80),
-    (31, 3, 9, 'Assassino Noturno', 14, 'I', 55, 6, 0, 16, 9, 11, 10, 13, 14, 75),
-    (32, 4, 6, 'Monge das Trevas', 11, 'I', 50, 5, 0, 14, 8, 10, 9, 12, 15, 70),
-    (33, 5, 7, 'Paladino das Profundezas', 8, 'I', 100, 8, 0, 9, 13, 15, 14, 9, 10, 120),
-    (34, 6, 3, 'Clérigo dos Mortos', 6, 'I', 60, 6, 0, 9, 11, 8, 12, 16, 15, 90),
-    (35, 7, 1, 'Bárbaro das Catacumbas', 7, 'I', 110, 9, 0, 10, 7, 18, 15, 7, 8, 130),
-    (36, 8, 4, 'Druida da Escuridão', 17, 'I', 75, 7, 0, 11, 10, 9, 12, 16, 14, 85),
-    (37, 9, 5, 'Guerreiro Subterrâneo', 19, 'I', 85, 7, 0, 12, 9, 17, 13, 8, 10, 110),
-    (38, 10, 2, 'Bardo dos Sepulcros', 9, 'I', 50, 5, 0, 13, 12, 8, 9, 12, 16, 65),
-    (39, 11, 10, 'Mago das Sombras', 20, 'I', 70, 7, 0, 12, 13, 9, 10, 11, 18, 90),
-    (40, 12, 3, 'Clérigo das Trevas Eternas', 6, 'I', 60, 6, 0, 10, 11, 8, 11, 15, 16, 80),
-    (41, 13, 8, 'Arqueiro do Crepúsculo', 11, 'I', 65, 6, 0, 14, 9, 10, 10, 12, 15, 75),
-    (42, 14, 7, 'Paladino da Noite Eterna', 15, 'I', 95, 8, 0, 10, 12, 14, 13, 9, 11, 115),
-    (43, 15, 5, 'Guerreiro das Trevas', 19, 'I', 80, 7, 0, 11, 9, 16, 12, 10, 12, 105);
-    (44, 1, 9, 'Bardo Melódico', 9, 'I', 50, 5, 0, 12, 15, 8, 10, 14, 16, 60),
-    (45, 2, 2, 'Cantor Encantador', 12, 'I', 45, 4, 0, 11, 14, 7, 9, 13, 15, 55),
-    (46, 3, 3, 'Clérigo do Coral Celestial', 6, 'I', 65, 6, 0, 10, 13, 9, 11, 16, 15, 80),
-    (47, 4, 1, 'Bárbaro do Ritmo Selvagem', 7, 'I', 90, 8, 0, 10, 9, 17, 14, 8, 9, 110),
-    (48, 5, 4, 'Druida da Harmonia Natural', 17, 'I', 70, 7, 0, 12, 11, 9, 12, 16, 14, 85),
-    (49, 6, 5, 'Guerreiro das Notas Agudas', 19, 'I', 85, 7, 0, 11, 10, 16, 13, 9, 12, 100),
-    (50, 7, 8, 'Arqueiro das Melodias', 11, 'I', 55, 5, 0, 14, 12, 8, 10, 13, 14, 75),
-    (51, 8, 11, 'Feiticeiro do Som', 10, 'I', 60, 7, 0, 11, 13, 10, 11, 14, 16, 80),
-    (52, 9, 7, 'Paladino da Canção Sagrada', 15, 'I', 100, 8, 0, 10, 14, 15, 14, 9, 11, 120),
-    (53, 10, 6, 'Monge dos Ecos Eternos', 10, 'I', 50, 5, 0, 14, 12, 9, 10, 12, 16, 70),
-    (54, 11, 10, 'Mago da Sinfonia Arcana', 20, 'I', 75, 7, 0, 12, 14, 9, 10, 11, 18, 95),
-    (55, 12, 2, 'Cantor dos Encantos', 9, 'I', 55, 5, 0, 13, 15, 8, 9, 12, 17, 65),
-    (56, 13, 3, 'Clérigo dos Cânticos Sagrados', 6, 'I', 60, 6, 0, 10, 12, 8, 11, 15, 16, 80),
-    (57, 14, 4, 'Druida dos Sons da Natureza', 16, 'I', 75, 7, 0, 11, 11, 10, 12, 17, 13, 85),
-    (58, 15, 1, 'Bárbaro da Batida Tribal', 7, 'I', 95, 8, 0, 10, 8, 18, 15, 7, 9, 125);
-
--- Donos das lojas em Águas Profundas
-    (59, 15, 5, 'Tharion, o Mestre do Couro', 3, 'P', 60, 5, 0, 10, 14, 12, 10, 12, 10, 200), -- Amadureiro
-    (60, 16, 6, 'Kael, o Forjador', 4, 'P', 80, 7, 0, 11, 10, 15, 14, 12, 9, 300);          -- Armeiro
-
--- Donos das lojas em Baldur’s Gate
-    (61, 17, 7, 'Lorien, o Viajante', 2, 'P', 50, 4, 0, 12, 13, 10, 10, 11, 14, 150),       -- Amadureiro
-    (62, 18, 8, 'Arwyn, o Alquimista', 6, 'P', 55, 6, 0, 11, 12, 9, 10, 13, 15, 250);        -- Alquimista
-
--- Donos das lojas em Neverwinter
-    (63, 19, 9, 'Darian, o Ferreiro', 5, 'P', 75, 6, 0, 10, 9, 14, 13, 10, 11, 300),        -- Armeiro
-    (64, 20, 10, 'Elyra, a Mística', 11, 'P', 65, 5, 0, 12, 14, 8, 10, 12, 16, 400);        -- Alquimista
-
--- Donos das lojas em Silverymoon
-    (65, 21, 11, 'Nerion, o Caçador de Tesouros', 8, 'P', 70, 6, 0, 13, 12, 12, 11, 12, 15, 350), -- Amadureiro
-    (66, 22, 12, 'Vaylin, o Espadachim', 9, 'P', 85, 7, 0, 10, 11, 16, 14, 10, 10, 500);          -- Armeiro
-
--- Personagens pacíficos
-    (67, 16, 2, 'Bardo Alegre', 2, 'P', 40, 4, 0, 10, 14, 8, 9, 12, 13, 200),
-    (68, 18, 4, 'Druida Protetor', 4, 'P', 60, 5, 0, 11, 12, 10, 10, 15, 14, 150);
-
--- Dragões de Fogo
-    (69, 101, 10, 'Ignarion, o Caldeirão de Fogo', 7, 'I', 500, 20, 0, 15, 18, 25, 22, 14, 16, 10000),
-    (70, 102, 10, 'Pyrrhos, a Fúria Escaldante', 7, 'I', 450, 19, 0, 14, 17, 24, 21, 13, 15, 9500),
-
--- Dragões de Gelo
-    (71, 103, 10, 'Glaciaris, o Inverno Eterno', 7, 'I', 480, 19, 0, 13, 16, 23, 20, 15, 14, 9000),
-    (72, 104, 10, 'Frostfang, o Devastador Ártico', 7, 'I', 470, 18, 0, 12, 15, 22, 21, 14, 15, 8500),
-
--- Dragões Negros
-    (73, 105, 10, 'Umbraxas, o Pesadelo Venenoso', 7, 'I', 510, 20, 0, 16, 19, 26, 23, 14, 17, 10500),
-    (74, 106, 10, 'Onyxion, o Terror Sombrio', 7, 'I', 490, 19, 0, 15, 18, 25, 22, 13, 16, 10000),
-
--- Dragões de Ouro
-    (75, 107, 10, 'Aurelion, o Guardião das Chamas', 7, 'I', 520, 21, 0, 17, 20, 27, 24, 16, 18, 11000),
-    (76, 108, 10, 'Solaryn, o Luminar Dourado', 7, 'I', 500, 20, 0, 16, 19, 26, 23, 15, 17, 10500),
-
--- Dragões Verdes
-    (77, 109, 10, 'Verdantor, o Carrasco Esmeralda', 7, 'I', 490, 19, 0, 15, 18, 25, 22, 14, 16, 9500),
-    (78, 110, 10, 'Thalassor, o Guardião Verdejante', 7, 'I', 480, 18, 0, 14, 17, 24, 21, 13, 15, 9000);
+    (1, 1, 1);
 
 -- UPDATES --
 
