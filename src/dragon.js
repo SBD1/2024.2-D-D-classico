@@ -1,5 +1,6 @@
+import chalk from 'chalk';
 export default function printDragon() {
-    console.log(`                                        ,   ,
+  console.log(chalk.bold.hex('#FF6347')(`                                        ,   ,
                                         $,  $,     ,
                                         "ss.$ss. .s'
                                 ,     .ss$$$$$$$$$$s,
@@ -42,5 +43,5 @@ export default function printDragon() {
     \\)_$$$$$$$$$$$$$$$$$$$$$$$##"  \$\$        \`\$\.        \`\$.
         \`"S$$$$$$$$$$$$$$$$$#"      \$          \`\$          \`\$
             \`"""""""""""""'         '           '           '
-`)
+`))
 }
