@@ -48,27 +48,6 @@ const mainMenu = async () => {
   }
 };
 
-const visualizarAtributosClasse = async (classes) => {
-  while (true) {
-    const escolha = await select({
-      message: 'Escolha uma classe para visualizar seus atributos',
-      choices: [
-        ...classes.map(c => ({ name: c.nome, value: c.id })),
-        { name: 'Voltar', value: 'back' }
-      ]
-    });
-
-    if (escolha === 'back') break;
-
-    const classeSelecionada = classes.find(c => c.id === escolha);
-    if (classeSelecionada) {
-      console.log(`\n=== Atributos da Classe: ${classeSelecionada.nome} ===`);
-      console.log(`Bonus: ${classeSelecionada.bonus}`);
-      console.log(`Tipo: ${classeSelecionada.tipo}\n`);
-    }
-  }
-};
-
 const registerPlayerOption = async () => {
   console.log("=== ETAPA 1 - Escolha a raça do seu personagem ===");
   const racas = await getRacas();
