@@ -4,7 +4,7 @@ import { connect } from './db-connection.js';
 import { needSeedTable, seedDBTables } from './sql-loader.js';
 import { select, input } from '@inquirer/prompts';
 import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation } from './entities/personagem.entity.js'
-import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus } from './playerRepository.js';
+import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByName } from './playerRepository.js';
 import taskQueue from './action-queue.js';
 import printDragon from './dragon.js';
 import chalk from 'chalk';
@@ -30,24 +30,44 @@ const welcome = async () => {
 }
 
 const mainMenu = async () => {
-  console.log('Bem vindo ao D&D classico\n');
-  printDragon()
+  console.log('Bem vindo ao D&D Clássico\n');
+  printDragon();
 
   const answer = await select({
     message: 'Escolha o que quer fazer',
     choices: [
+      { name: 'Cadastrar', value: 'register' },
+      { name: 'Entrar', value: 'login' },
       { name: 'Sair', value: 'exit' },
-      { name: 'Entrar', value: 'enter' },
     ]
   });
 
   if (answer === 'exit') {
-    console.log("Saindo");
+    console.log("Saindo...");
     process.exit(0);
-  } else {
+  } else if (answer === 'register') {
     taskQueue.enqueue(registerPlayerOption);
+  } else if (answer === 'login') {
+    taskQueue.enqueue(loginPlayer);
   }
 };
+
+const loginPlayer = async () => {
+  const name = await input({ message: 'Digite o nome do seu personagem:' });
+
+  const playerData = await getPlayerByName(name);
+
+  if (!playerData) {
+    console.log(chalk.red("Personagem não encontrado! Tente novamente."));
+    taskQueue.enqueue(mainMenu);
+    return;
+  }
+
+  console.log(chalk.green(`Bem-vindo de volta, ${playerData.nome}!`));
+  taskQueue.enqueue(() => walk(playerData));
+};
+
+
 
 const registerPlayerOption = async () => {
   console.log(chalk.bold.hex('#FF6347')("=== ETAPA 1 - Escolha a raça do seu personagem ==="));
@@ -168,8 +188,8 @@ const registerPlayerOption = async () => {
 
 const showPlayerStatus = async (player, previousMenu) => {
   if (!player || !player.id) {
-      console.log("Nenhum jogador encontrado.");
-      return;
+    console.log("Nenhum jogador encontrado.");
+    return;
   }
 
   const status = await getPlayerStatus(player.id);
@@ -177,18 +197,18 @@ const showPlayerStatus = async (player, previousMenu) => {
 
   console.log(chalk.bold.hex('#FFD700')("\n=== STATUS DO PERSONAGEM ==="));
   Object.entries(status).forEach(([key, value]) => {
-      console.log(`${key.toUpperCase()}: ${value}`);
+    console.log(`${key.toUpperCase()}: ${value}`);
   });
 
-  await input({ message: "Pressione Enter para continuar..." });  
+  await input({ message: "Pressione Enter para continuar..." });
 
-  taskQueue.enqueue(() => previousMenu(player));  
+  taskQueue.enqueue(() => previousMenu(player));
 };
 
 
 const walk = async (player) => {
   if (!player || !player.id) {
-      throw new Error("Erro: player está indefinido ou sem ID!");
+    throw new Error("Erro: player está indefinido ou sem ID!");
   }
 
   const outrasSalas = await getPlayerCurrentLocation(player.id);
@@ -197,37 +217,37 @@ const walk = async (player) => {
   console.log(`\n=== Você está atualmente em uma sala ===`);
 
   if (outrasSalas.length > 0) {
-      console.log("\n🔹 Salas disponíveis para viajar:");
-      outrasSalas.forEach((sala, index) => {
-          console.log(`  ${index + 1}. ${sala.nome} (ID: ${sala.id})`);
-      });
+    console.log("\n🔹 Salas disponíveis para viajar:");
+    outrasSalas.forEach((sala, index) => {
+      console.log(`  ${index + 1}. ${sala.nome} (ID: ${sala.id})`);
+    });
   } else {
-      console.log("\n⚠️ Nenhuma sala disponível para viajar.");
+    console.log("\n⚠️ Nenhuma sala disponível para viajar.");
   }
 
   console.log("\n=== Escolha uma ação ===");
 
   const answer = await select({
-      message: "O que deseja fazer?",
-      choices: [
-          ...outrasSalas.map(i => ({
-              name: `Ir para: ${i.nome}`, 
-              value: i.id
-          })),
-          { name: "Exibir Status", value: "status" },
-          { name: "Sair do jogo", value: "exit" }
-      ],
+    message: "O que deseja fazer?",
+    choices: [
+      ...outrasSalas.map(i => ({
+        name: `Ir para: ${i.nome}`,
+        value: i.id
+      })),
+      { name: "Exibir Status", value: "status" },
+      { name: "Sair do jogo", value: "exit" }
+    ],
   });
 
   if (answer === "status") {
-      taskQueue.enqueue(() => showPlayerStatus(player, walk));
+    taskQueue.enqueue(() => showPlayerStatus(player, walk));
   } else if (answer === "exit") {
-      console.log("Saindo do jogo...");
-      process.exit(0);
+    console.log("Saindo do jogo...");
+    process.exit(0);
   } else {
-      await updatePlayerLocation(answer, player.id);
-      console.clear();
-      taskQueue.enqueue(() => walk(player));
+    await updatePlayerLocation(answer, player.id);
+    console.clear();
+    taskQueue.enqueue(() => walk(player));
   }
 };
 
