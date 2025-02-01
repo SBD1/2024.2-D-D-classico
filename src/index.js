@@ -6,6 +6,7 @@ import { select, input } from '@inquirer/prompts';
 import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation } from './entities/personagem.entity.js'
 import { insertPlayerToDB, getRacas, getClasses } from './playerRepository.js';
 import taskQueue from './action-queue.js';
+import printDragon from './dragon.js';
 // import inquirer from 'inquirer'; 
 // import gradient from 'gradient-string';
 // import chalkAnimation from 'chalk-animation';
@@ -29,6 +30,7 @@ const welcome = async () => {
 
 const mainMenu = async () => {
   console.log('Bem vindo ao D&D classico\n');
+  printDragon()
 
   const answer = await select({
     message: 'Escolha o que quer fazer',
