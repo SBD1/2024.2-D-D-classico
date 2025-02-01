@@ -33,14 +33,8 @@ const mainMenu = async () => {
   const answer = await select({
     message: 'Escolha o que quer fazer',
     choices: [
-      {
-        name: 'Sair',
-        value: 'exit',
-      },
-      {
-        name: 'Entrar',
-        value: 'enter',
-      },
+      { name: 'Sair', value: 'exit' },
+      { name: 'Entrar', value: 'enter' },
     ]
   });
 
@@ -48,13 +42,33 @@ const mainMenu = async () => {
     console.log("Saindo");
     process.exit(0);
   } else {
-    taskQueue.enqueue(() => registerPlayerOption()); // Enfileira a função corretamente
-
+    taskQueue.enqueue(registerPlayerOption);
   }
-}
+};
+
+const visualizarAtributosClasse = async (classes) => {
+  while (true) {
+    const escolha = await select({
+      message: 'Escolha uma classe para visualizar seus atributos',
+      choices: [
+        ...classes.map(c => ({ name: c.nome, value: c.id })),
+        { name: 'Voltar', value: 'back' }
+      ]
+    });
+
+    if (escolha === 'back') break;
+
+    const classeSelecionada = classes.find(c => c.id === escolha);
+    if (classeSelecionada) {
+      console.log(`\n=== Atributos da Classe: ${classeSelecionada.nome} ===`);
+      console.log(`Bonus: ${classeSelecionada.bonus}`);
+      console.log(`Tipo: ${classeSelecionada.tipo}\n`);
+    }
+  }
+};
 
 const registerPlayerOption = async () => {
-  console.log("=== Escolha sua raça ===");
+  console.log("=== ETAPA 1 - Escolha a raça do seu personagem ===");
   const racas = await getRacas();
   racas.forEach(({ id, nome }) => console.log(`${id}: ${nome}`));
 
@@ -65,15 +79,60 @@ const registerPlayerOption = async () => {
     console.log("Raça inválida! Escolha um ID válido.");
   }
 
-  console.log("\n=== Escolha sua classe ===");
-  const classes = await getClasses();
-  classes.forEach(({ id, nome }) => console.log(`${id}: ${nome}`));
+  const classes = [
+    { id: 1, nome: "Bárbaro", xp_base: 0, destreza: 15, carisma: 8, forca: 18, constituicao: 16, sabedoria: 10, inteligencia: 8 },
+    { id: 2, nome: "Bardo", xp_base: 0, destreza: 14, carisma: 16, forca: 10, constituicao: 12, sabedoria: 12, inteligencia: 14 },
+    { id: 3, nome: "Clérigo", xp_base: 0, destreza: 10, carisma: 12, forca: 12, constituicao: 14, sabedoria: 18, inteligencia: 14 },
+    { id: 4, nome: "Druida", xp_base: 0, destreza: 12, carisma: 10, forca: 14, constituicao: 15, sabedoria: 16, inteligencia: 13 },
+    { id: 5, nome: "Guerreiro", xp_base: 0, destreza: 14, carisma: 10, forca: 18, constituicao: 16, sabedoria: 10, inteligencia: 12 },
+    { id: 6, nome: "Monge", xp_base: 0, destreza: 16, carisma: 10, forca: 14, constituicao: 15, sabedoria: 14, inteligencia: 12 },
+    { id: 7, nome: "Paladino", xp_base: 0, destreza: 12, carisma: 16, forca: 14, constituicao: 16, sabedoria: 12, inteligencia: 10 },
+    { id: 8, nome: "Patrulheiro", xp_base: 0, destreza: 16, carisma: 10, forca: 14, constituicao: 14, sabedoria: 12, inteligencia: 12 },
+    { id: 9, nome: "Ladino", xp_base: 0, destreza: 18, carisma: 12, forca: 10, constituicao: 14, sabedoria: 10, inteligencia: 14 },
+    { id: 10, nome: "Feiticeiro", xp_base: 0, destreza: 10, carisma: 12, forca: 8, constituicao: 12, sabedoria: 12, inteligencia: 18 },
+    { id: 11, nome: "Bruxo", xp_base: 0, destreza: 12, carisma: 14, forca: 10, constituicao: 12, sabedoria: 12, inteligencia: 16 },
+    { id: 12, nome: "Mago", xp_base: 0, destreza: 10, carisma: 12, forca: 8, constituicao: 10, sabedoria: 14, inteligencia: 18 },
+  ];
 
   let id_classe;
   while (true) {
-    id_classe = await input({ message: 'Digite o ID da sua classe:', required: true });
-    if (classes.some(c => c.id === parseInt(id_classe))) break;
-    console.log("Classe inválida! Escolha um ID válido.");
+    console.log("\n=== ETAPA 2 - Digite o número correspondente à ação que deseja realizar ===");
+    console.log("1 - Escolher Classe");
+    console.log("2 - Visualizar atributos de cada classe");
+
+    const escolha = await input({ message: 'Digite sua escolha:', required: true });
+
+    if (escolha === '1') {
+      console.log("\n=== Escolha sua classe ===");
+      classes.forEach(({ id, nome }) => console.log(`${id}: ${nome}`));
+
+      while (true) {
+        id_classe = await input({ message: 'Digite o ID da sua classe:', required: true });
+        if (classes.some(c => c.id === parseInt(id_classe))) break;
+        console.log("Classe inválida! Escolha um ID válido.");
+      }
+      break;
+    }
+
+    if (escolha === '2') {
+      console.log("\n=== Escolha a classe que deseja visualizar ===");
+      classes.forEach(({ id, nome }) => console.log(`${id}: ${nome}`));
+
+      let id_visualizar;
+      while (true) {
+        id_visualizar = await input({ message: 'Digite o ID da classe para visualizar:', required: true });
+        const classeSelecionada = classes.find(c => c.id === parseInt(id_visualizar));
+        if (classeSelecionada) {
+          console.log("\n=== Atributos da Classe ===");
+          Object.entries(classeSelecionada).forEach(([key, value]) => {
+            if (key !== "id" && key !== "nome") console.log(`${key}: ${value}`);
+          });
+          console.log("\n");
+          break;
+        }
+        console.log("ID inválido! Escolha um ID válido.");
+      }
+    }
   }
 
   const name = await input({
@@ -90,29 +149,26 @@ const registerPlayerOption = async () => {
     tipo_personagem: 'PC',
     vida: 100,
     nivel: 1,
-    xp_base: 1,
-    destreza: 1,
-    carisma: 1,
-    forca: 1,
-    constituicao: 1,
-    sabedoria: 1,
-    inteligencia: 1,
+    xp_base: classes.find(c => c.id === parseInt(id_classe)).xp_base,
+    destreza: classes.find(c => c.id === parseInt(id_classe)).destreza,
+    carisma: classes.find(c => c.id === parseInt(id_classe)).carisma,
+    forca: classes.find(c => c.id === parseInt(id_classe)).forca,
+    constituicao: classes.find(c => c.id === parseInt(id_classe)).constituicao,
+    sabedoria: classes.find(c => c.id === parseInt(id_classe)).sabedoria,
+    inteligencia: classes.find(c => c.id === parseInt(id_classe)).inteligencia,
     gold: 10,
   };
 
   const player = await insertPlayerToDB(playerData);
-  console.log("Player retornado:", player);
-
-
   console.log("\nSeu personagem foi criado com sucesso:");
   Object.entries(player).forEach(([key, value]) => {
     if (key !== "id") console.log(`${key}: ${value}`);
   });
-  taskQueue.enqueue(() => walk(player));  // Enfileira a função corretamente
 
+  taskQueue.enqueue(() => walk(player));
 };
 
-export default registerPlayerOption;
+
 
 const walk = async (player) => {
   if (!player || !player.id) {
@@ -130,11 +186,9 @@ const walk = async (player) => {
   })
 
   await updatePlayerLocation(answer, player.id);
-  console.clear()
-  taskQueue.enqueue(() => walk(player));  // Enfileira a função corretamente
-
-}
-
+  console.clear();
+  taskQueue.enqueue(() => walk(player));
+};
 
 await welcome();
 taskQueue.enqueue(mainMenu);
@@ -142,8 +196,6 @@ taskQueue.enqueue(mainMenu);
 while (true) {
   try {
     const currentFunction = taskQueue.dequeue();
-
-    console.log("Tarefa retirada da fila:", currentFunction); // Verifique o que está sendo retirado da fila
 
     if (!currentFunction) {
       taskQueue.enqueue(mainMenu);
