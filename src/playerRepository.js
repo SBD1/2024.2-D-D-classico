@@ -53,3 +53,25 @@ export const getClasses = async () => {
         return [];
     }
 };
+
+export const getPlayerStatus = async (playerId) => {
+    try {
+        const { rows } = await client.query(
+            `SELECT nome, vida, nivel, xp_base, destreza, carisma, forca, 
+                    constituicao, sabedoria, inteligencia, gold 
+             FROM Personagem 
+             WHERE id = $1`,
+            [playerId]
+        );
+
+        if (rows.length === 0) {
+            console.log("Personagem não encontrado.");
+            return null;
+        }
+
+        return rows[0];
+    } catch (error) {
+        console.error("Erro ao buscar status do personagem:", error);
+        return null;
+    }
+};

@@ -4,7 +4,7 @@ import { connect } from './db-connection.js';
 import { needSeedTable, seedDBTables } from './sql-loader.js';
 import { select, input } from '@inquirer/prompts';
 import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation } from './entities/personagem.entity.js'
-import { insertPlayerToDB, getRacas, getClasses } from './playerRepository.js';
+import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus } from './playerRepository.js';
 import taskQueue from './action-queue.js';
 import printDragon from './dragon.js';
 import chalk from 'chalk';
@@ -166,28 +166,70 @@ const registerPlayerOption = async () => {
   }
 };
 
+const showPlayerStatus = async (player, previousMenu) => {
+  if (!player || !player.id) {
+      console.log("Nenhum jogador encontrado.");
+      return;
+  }
 
+  const status = await getPlayerStatus(player.id);
+  if (!status) return;
 
+  console.log(chalk.bold.hex('#FFD700')("\n=== STATUS DO PERSONAGEM ==="));
+  Object.entries(status).forEach(([key, value]) => {
+      console.log(`${key.toUpperCase()}: ${value}`);
+  });
+
+  await input({ message: "Pressione Enter para continuar..." });  
+
+  taskQueue.enqueue(() => previousMenu(player));  
+};
 
 
 const walk = async (player) => {
   if (!player || !player.id) {
-    throw new Error("Erro: player está indefinido ou sem ID!");
+      throw new Error("Erro: player está indefinido ou sem ID!");
   }
 
   const outrasSalas = await getPlayerCurrentLocation(player.id);
 
-  const answer = await select({
-    message: "Salas disponíveis para mudar",
-    choices: outrasSalas.map(i => ({
-      name: i.nome,
-      value: i.id
-    })),
-  })
-
-  await updatePlayerLocation(answer, player.id);
   console.clear();
-  taskQueue.enqueue(() => walk(player));
+  console.log(`\n=== Você está atualmente em uma sala ===`);
+
+  // Exibindo as opções de salas antes do seletor
+  if (outrasSalas.length > 0) {
+      console.log("\n🔹 Salas disponíveis para viajar:");
+      outrasSalas.forEach((sala, index) => {
+          console.log(`  ${index + 1}. ${sala.nome} (ID: ${sala.id})`);
+      });
+  } else {
+      console.log("\n⚠️ Nenhuma sala disponível para viajar.");
+  }
+
+  console.log("\n=== Escolha uma ação ===");
+
+  const answer = await select({
+      message: "O que deseja fazer?",
+      choices: [
+          ...outrasSalas.map(i => ({
+              name: `Ir para: ${i.nome}`, // Mantém o nome visível
+              value: i.id
+          })),
+          { name: "Exibir Status", value: "status" },
+          { name: "Sair do jogo", value: "exit" }
+      ],
+  });
+
+  if (answer === "status") {
+      taskQueue.enqueue(() => showPlayerStatus(player, walk));
+  } else if (answer === "exit") {
+      console.log("Saindo do jogo...");
+      process.exit(0);
+  } else {
+      await updatePlayerLocation(answer, player.id);
+      console.clear();
+      taskQueue.enqueue(() => walk(player));
+  }
 };
 
 await welcome();
