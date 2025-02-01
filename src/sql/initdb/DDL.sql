@@ -162,6 +162,98 @@ CREATE TABLE IF NOT EXISTS Arma (
     descricao varchar(500)
 );
 
+-- Criando a PROCEDURE para definir atributos com base na classe
+CREATE OR REPLACE PROCEDURE DefinirAtributosPorClasse(
+    IN p_id_classe INT,
+    OUT p_xp_base INT,
+    OUT p_destreza INT,
+    OUT p_carisma INT,
+    OUT p_forca INT,
+    OUT p_constituicao INT,
+    OUT p_sabedoria INT,
+    OUT p_inteligencia INT
+) 
+AS $DefinirAtributosPorClasse$
+BEGIN
+    -- Definir valores padrão
+    p_xp_base := 0;
+
+    -- Selecionar atributos conforme a classe
+    CASE p_id_classe
+        WHEN 1 THEN -- Bárbaro
+            p_destreza := 15; p_carisma := 8; p_forca := 18; p_constituicao := 16; p_sabedoria := 10; p_inteligencia := 8;
+        WHEN 2 THEN -- Bardo
+            p_destreza := 14; p_carisma := 16; p_forca := 10; p_constituicao := 12; p_sabedoria := 12; p_inteligencia := 14;
+        WHEN 3 THEN -- Clérigo
+            p_destreza := 10; p_carisma := 12; p_forca := 12; p_constituicao := 14; p_sabedoria := 18; p_inteligencia := 14;
+        WHEN 4 THEN -- Druida
+            p_destreza := 12; p_carisma := 10; p_forca := 14; p_constituicao := 15; p_sabedoria := 16; p_inteligencia := 13;
+        WHEN 5 THEN -- Guerreiro
+            p_destreza := 14; p_carisma := 10; p_forca := 18; p_constituicao := 16; p_sabedoria := 10; p_inteligencia := 12;
+        WHEN 6 THEN -- Monge
+            p_destreza := 16; p_carisma := 10; p_forca := 14; p_constituicao := 15; p_sabedoria := 14; p_inteligencia := 12;
+        WHEN 7 THEN -- Paladino
+            p_destreza := 12; p_carisma := 16; p_forca := 14; p_constituicao := 16; p_sabedoria := 12; p_inteligencia := 10;
+        WHEN 8 THEN -- Patrulheiro
+            p_destreza := 16; p_carisma := 10; p_forca := 14; p_constituicao := 14; p_sabedoria := 12; p_inteligencia := 12;
+        WHEN 9 THEN -- Ladino
+            p_destreza := 18; p_carisma := 12; p_forca := 10; p_constituicao := 14; p_sabedoria := 10; p_inteligencia := 14;
+        WHEN 10 THEN -- Feiticeiro
+            p_destreza := 10; p_carisma := 12; p_forca := 8; p_constituicao := 12; p_sabedoria := 12; p_inteligencia := 18;
+        WHEN 11 THEN -- Bruxo
+            p_destreza := 12; p_carisma := 14; p_forca := 10; p_constituicao := 12; p_sabedoria := 12; p_inteligencia := 16;
+        WHEN 12 THEN -- Mago
+            p_destreza := 10; p_carisma := 12; p_forca := 8; p_constituicao := 10; p_sabedoria := 14; p_inteligencia := 18;
+        ELSE 
+            p_destreza := 10; p_carisma := 10; p_forca := 10; p_constituicao := 10; p_sabedoria := 10; p_inteligencia := 10;
+    END CASE;
+END;
+$DefinirAtributosPorClasse$ LANGUAGE plpgsql;
+
+-- Criando o TRIGGER FUNCTION para chamar a procedure antes da inserção
+CREATE OR REPLACE FUNCTION before_insert_personagem()
+RETURNS TRIGGER AS $before_insert_personagem$
+DECLARE
+    v_xp_base INT;
+    v_destreza INT;
+    v_carisma INT;
+    v_forca INT;
+    v_constituicao INT;
+    v_sabedoria INT;
+    v_inteligencia INT;
+BEGIN
+    -- Chama a procedure para definir os atributos
+    CALL DefinirAtributosPorClasse(
+        NEW.id_classe,
+        v_xp_base,
+        v_destreza,
+        v_carisma,
+        v_forca,
+        v_constituicao,
+        v_sabedoria,
+        v_inteligencia
+    );
+
+    -- Atualiza os atributos do novo personagem
+    NEW.xp_base := v_xp_base;
+    NEW.destreza := v_destreza;
+    NEW.carisma := v_carisma;
+    NEW.forca := v_forca;
+    NEW.constituicao := v_constituicao;
+    NEW.sabedoria := v_sabedoria;
+    NEW.inteligencia := v_inteligencia;
+
+    RETURN NEW;
+END;
+$before_insert_personagem$ LANGUAGE plpgsql;
+
+-- Criando o TRIGGER para acionar a função antes da inserção
+CREATE TRIGGER before_insert_personagem_trigger
+BEFORE INSERT ON Personagem
+FOR EACH ROW
+EXECUTE FUNCTION before_insert_personagem();
+
+
 -- Keys
 
 ALTER TABLE Salas ADD CONSTRAINT "FK_01" FOREIGN KEY (id_regiao) REFERENCES Regiao (id);
