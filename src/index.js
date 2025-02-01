@@ -7,6 +7,7 @@ import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation } from '
 import { insertPlayerToDB, getRacas, getClasses } from './playerRepository.js';
 import taskQueue from './action-queue.js';
 import printDragon from './dragon.js';
+import chalk from 'chalk';
 // import inquirer from 'inquirer'; 
 // import gradient from 'gradient-string';
 // import chalkAnimation from 'chalk-animation';
@@ -49,7 +50,7 @@ const mainMenu = async () => {
 };
 
 const registerPlayerOption = async () => {
-  console.log("=== ETAPA 1 - Escolha a raça do seu personagem ===");
+  console.log(chalk.bold.hex('#FF6347')("=== ETAPA 1 - Escolha a raça do seu personagem ==="));
   const racas = await getRacas();
   racas.forEach(({ id, nome }) => console.log(`${id}: ${nome}`));
 
@@ -77,7 +78,7 @@ const registerPlayerOption = async () => {
 
   let id_classe;
   while (true) {
-    console.log("\n=== ETAPA 2 - Digite o número correspondente à ação que deseja realizar ===");
+    console.log(chalk.bold.hex('#FF6347')("\n=== ETAPA 2 - Digite o número correspondente à ação que deseja realizar ==="));
     console.log("1 - Escolher Classe");
     console.log("2 - Visualizar atributos de cada classe");
 
