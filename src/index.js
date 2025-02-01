@@ -10,6 +10,8 @@ import { insertPlayerToDB, getRacas, getClasses } from './playerRepository.js';
 import taskQueue from './action-queue.js';
 import printDragon from './dragon.js';
 import chalk from 'chalk';
+
+import { startMission,completeMission } from './missao.js';
 // import inquirer from 'inquirer'; 
 // import gradient from 'gradient-string';
 // import chalkAnimation from 'chalk-animation';
@@ -179,6 +181,8 @@ const walk = async (player) => {
   }
 
   choices.push({ name: 'Sair do jogo', value: 'exit' });
+  choices.push({ name: 'iniciar missao', value: 'iniciarmissao' });
+  choices.push({ name: 'completar missao', value: 'completarmissao' });
 
   // Exibe o menu de ações para o jogador
   const answer = await select({
@@ -194,7 +198,16 @@ const walk = async (player) => {
   } else if (answer.startsWith('loja_')) {
     const lojaId = parseInt(answer.replace('loja_', ''));
     await comprarItem(player.id, lojaId);
-    taskQueue.enqueue(() => walk(player)); // Retorna à exploração após a compra
+    taskQueue.enqueue(() => walk(player));
+     // Retorna à exploração após a compra
+    } else if (answer === 'iniciarmissao') {
+      await startMission(player.id, 1);
+      taskQueue.enqueue(() => walk(player));
+      
+    } else if (answer === 'completarmissao') {
+      await completeMission(player.id, 1);
+      taskQueue.enqueue(() => walk(player));
+      
   } else if (answer === 'exit') {
     console.log("Saindo...");
     process.exit(0);
