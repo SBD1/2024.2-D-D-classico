@@ -1,6 +1,8 @@
 #! /usr/bin/env node
 
 import { connect } from './db-connection.js';
+import { comprarItem } from './loja.js';
+import { getLojaNaSala } from './lojaRepository.js';
 import { needSeedTable, seedDBTables } from './sql-loader.js';
 import { select, input } from '@inquirer/prompts';
 import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation } from './entities/personagem.entity.js'
@@ -157,19 +159,46 @@ const walk = async (player) => {
     throw new Error("Erro: player está indefinido ou sem ID!");
   }
 
+  console.log(chalk.bold.hex('#FFD700')(`\nVocê está na sala: ${player.salaAtual}`));
+
+  // Busca salas disponíveis para movimentação
   const outrasSalas = await getPlayerCurrentLocation(player.id);
 
-  const answer = await select({
-    message: "Salas disponíveis para mudar",
-    choices: outrasSalas.map(i => ({
-      name: i.nome,
-      value: i.id
-    })),
-  })
+  // Busca se existe uma loja na sala atual
+  const loja = await getLojaNaSala(15);
+  console.log(loja.rows[0].nome);
 
-  await updatePlayerLocation(answer, player.id);
-  console.clear();
-  taskQueue.enqueue(() => walk(player));
+  // Opções disponíveis no menu
+  const choices = outrasSalas.map(i => ({
+    name: `Ir para ${i.nome}`,
+    value: `mover_${i.id}`
+  }));
+
+  if (loja) {
+    choices.push({ name: `Visitar ${loja.rows[0].nome} (${loja.rows[0].tipo})`, value: `loja_${loja.rows[0].id}` });
+  }
+
+  choices.push({ name: 'Sair do jogo', value: 'exit' });
+
+  // Exibe o menu de ações para o jogador
+  const answer = await select({
+    message: "O que deseja fazer?",
+    choices
+  });
+
+  if (answer.startsWith('mover_')) {
+    const salaDestino = parseInt(answer.replace('mover_', ''));
+    await updatePlayerLocation(salaDestino, player.id);
+    console.clear();
+    taskQueue.enqueue(() => walk(player));
+  } else if (answer.startsWith('loja_')) {
+    const lojaId = parseInt(answer.replace('loja_', ''));
+    await comprarItem(player.id, lojaId);
+    taskQueue.enqueue(() => walk(player)); // Retorna à exploração após a compra
+  } else if (answer === 'exit') {
+    console.log("Saindo...");
+    process.exit(0);
+  }
 };
 
 await welcome();

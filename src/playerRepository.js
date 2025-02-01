@@ -48,3 +48,30 @@ export const getClasses = async () => {
         return [];
     }
 };
+
+export const getPlayerGold = async (playerId) => {
+    const result = await client.query("SELECT gold FROM Personagem WHERE id = $1", [playerId]);
+    return result.rows[0].gold;
+  };
+  
+  export const updatePlayerGold = async (playerId, newGold) => {
+    try {
+        return client.query("UPDATE Personagem SET gold = $1 WHERE id = $2", [newGold, playerId]);
+    } catch (error) {
+        console.error('Erro ao atualizar ouro do jogador:', error);
+        return;
+    }
+    
+  };
+  
+  export const addItemToInventory = async (playerId, itemId, quantidade) => {
+    try {// Adiciona um novo item ao inventário
+            return client.query(`
+              INSERT INTO Inventario (id_pc, id_instancia_item, capacidade) 
+              VALUES ($1, $2, $3)
+            `, [playerId, itemId, quantidade]);
+    } catch (error) {
+        console.error('Erro ao adicionar item ao inventário:', error);
+        return;
+    }
+  };
