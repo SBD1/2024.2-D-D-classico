@@ -196,7 +196,6 @@ const walk = async (player) => {
   console.clear();
   console.log(`\n=== Você está atualmente em uma sala ===`);
 
-  // Exibindo as opções de salas antes do seletor
   if (outrasSalas.length > 0) {
       console.log("\n🔹 Salas disponíveis para viajar:");
       outrasSalas.forEach((sala, index) => {
@@ -212,7 +211,7 @@ const walk = async (player) => {
       message: "O que deseja fazer?",
       choices: [
           ...outrasSalas.map(i => ({
-              name: `Ir para: ${i.nome}`, // Mantém o nome visível
+              name: `Ir para: ${i.nome}`, 
               value: i.id
           })),
           { name: "Exibir Status", value: "status" },
