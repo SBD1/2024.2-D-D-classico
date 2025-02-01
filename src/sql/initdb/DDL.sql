@@ -253,6 +253,8 @@ BEFORE INSERT ON Personagem
 FOR EACH ROW
 EXECUTE FUNCTION before_insert_personagem();
 
+ALTER TABLE Personagem
+ADD CONSTRAINT unique_nome UNIQUE (nome);
 
 -- Keys
 

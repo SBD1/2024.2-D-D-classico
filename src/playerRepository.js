@@ -22,10 +22,15 @@ export const insertPlayerToDB = async (playerData) => {
 
     try {
         const res = await client.query(query, values);
-        return res.rows[0];
+        return res.rows[0]; // Retorna o personagem criado
     } catch (err) {
-        console.error('Erro ao inserir jogador:', err);
-        throw err;
+        if (err.code === '23505') { // Verifica se o erro é de violação de chave única
+            console.error('Já existe um personagem com este nome, escolha um novo!');
+            throw new Error('Nome de personagem já existente.'); // Lança erro específico
+        } else {
+            console.error('Erro ao inserir jogador:', err);
+            throw err; // Rethrow se o erro for diferente
+        }
     }
 };
 

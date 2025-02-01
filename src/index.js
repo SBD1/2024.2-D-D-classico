@@ -117,38 +117,56 @@ const registerPlayerOption = async () => {
     }
   }
 
-  const name = await input({
-    message: 'Qual o nome do seu personagem?',
-    default: 'Player',
-    required: true
-  });
+  let name;
+  let playerCreated = false;
+  while (!playerCreated) {
+    name = await input({
+      message: 'Qual o nome do seu personagem?',
+      default: 'Player',
+      required: true
+    });
 
-  const playerData = {
-    id_sala: 1,
-    id_classe: parseInt(id_classe),
-    nome: name,
-    id_raca: parseInt(id_raca),
-    tipo_personagem: 'PC',
-    vida: 100,
-    nivel: 1,
-    xp_base: classes.find(c => c.id === parseInt(id_classe)).xp_base,
-    destreza: classes.find(c => c.id === parseInt(id_classe)).destreza,
-    carisma: classes.find(c => c.id === parseInt(id_classe)).carisma,
-    forca: classes.find(c => c.id === parseInt(id_classe)).forca,
-    constituicao: classes.find(c => c.id === parseInt(id_classe)).constituicao,
-    sabedoria: classes.find(c => c.id === parseInt(id_classe)).sabedoria,
-    inteligencia: classes.find(c => c.id === parseInt(id_classe)).inteligencia,
-    gold: 10,
-  };
+    try {
+      const playerData = {
+        id_sala: 1,
+        id_classe: parseInt(id_classe),
+        nome: name,
+        id_raca: parseInt(id_raca),
+        tipo_personagem: 'PC',
+        vida: 100,
+        nivel: 1,
+        xp_base: classes.find(c => c.id === parseInt(id_classe)).xp_base,
+        destreza: classes.find(c => c.id === parseInt(id_classe)).destreza,
+        carisma: classes.find(c => c.id === parseInt(id_classe)).carisma,
+        forca: classes.find(c => c.id === parseInt(id_classe)).forca,
+        constituicao: classes.find(c => c.id === parseInt(id_classe)).constituicao,
+        sabedoria: classes.find(c => c.id === parseInt(id_classe)).sabedoria,
+        inteligencia: classes.find(c => c.id === parseInt(id_classe)).inteligencia,
+        gold: 10,
+      };
 
-  const player = await insertPlayerToDB(playerData);
-  console.log("\nSeu personagem foi criado com sucesso:");
-  Object.entries(player).forEach(([key, value]) => {
-    if (key !== "id") console.log(`${key}: ${value}`);
-  });
+      // Tenta inserir o jogador no banco de dados
+      const player = await insertPlayerToDB(playerData);
+      console.log("\nSeu personagem foi criado com sucesso:");
+      console.log(`Nome: ${player.nome}`);
+      Object.entries(player).forEach(([key, value]) => {
+        if (key !== "id") console.log(`${key}: ${value}`);
+      });
 
-  taskQueue.enqueue(() => walk(player));
+      playerCreated = true;
+      taskQueue.enqueue(() => walk(player));
+    } catch (error) {
+      if (error.message === 'Nome de personagem já existente.') {
+        // Se o erro for de duplicidade
+        console.log(chalk.bold.hex('#FF6347')("Tente Novamente:"));
+      } else {
+        console.error("Erro ao criar personagem:", error);
+      }
+    }
+  }
 };
+
+
 
 
 
