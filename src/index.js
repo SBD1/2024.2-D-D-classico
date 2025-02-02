@@ -4,7 +4,7 @@ import { connect } from './db-connection.js';
 import { needSeedTable, seedDBTables } from './sql-loader.js';
 import { select, input } from '@inquirer/prompts';
 import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation } from './entities/personagem.entity.js'
-import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByName, getEntitiesInRoom } from './playerRepository.js';
+import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByName, getEntitiesInRoom, salvarPersonagem} from './playerRepository.js';
 import taskQueue from './action-queue.js';
 import printDragon from './dragon.js';
 import chalk from 'chalk';
@@ -205,23 +205,108 @@ const showPlayerStatus = async (player, previousMenu) => {
   taskQueue.enqueue(() => previousMenu(player));
 };
 
-const listarPersonagens = async (sala) => {
-  const entities = await getEntitiesInRoom(sala);
+const listarPersonagens = async (salaId) => {
+  const entities = await getEntitiesInRoom(salaId);
 
-  console.clear();
-  console.log("\n=== Personagens na sala ===");
-
-  if (entities.length > 0) {
-    entities.forEach(({ nome, tipo_personagem }) => {
-      console.log(`  - ${nome} (${tipo_personagem})`);
-    });
-  } else {
-    console.log("\n⚠️ Nenhum NPC ou inimigo na sala.");
+  if (entities.length === 0) {
+    console.clear();
+    console.log("\n⚠️ Nenhum inimigo nesta sala!");
+    await input({ message: "Pressione Enter para voltar" });
+    return null;
   }
 
-  await input({ message: "Pressione Enter para voltar" });
+  const escolha = await select({
+    message: "Selecione um inimigo para lutar:",
+    choices: [
+      ...entities.map(entity => ({
+        name: `${entity.nome} (${entity.tipo_personagem}) [${entity.nivel}]`,
+        value: entity
+      })),
+      { name: "Voltar", value: null }
+    ],
+    pageSize: 5 // Mostra 5 opções por vez
+  });
+
+  return escolha;
 };
 
+const iniciarCombate = async (jogador, inimigo) => {
+  if (!inimigo?.id) {
+    throw new Error("Inimigo sem ID válido!");
+  }
+  
+  console.clear();
+  console.log(`⚔️ Combate contra ${inimigo.nome} (Nível ${inimigo.nivel}) ⚔️\n`);
+
+  while (jogador.vida > 0 && inimigo.vida > 0) {
+    console.log(`Jogador: ${jogador.vida} HP`);
+    console.log(`Inimigo: ${inimigo.vida} HP\n`);
+
+    // Turno do jogador
+    const acao = await select({
+      message: "Escolha uma ação:",
+      choices: [
+        { name: "Atacar", value: "atacar" },
+        { name: "Fugir", value: "fugir" }
+      ]
+    });
+
+    if (acao === "fugir") {
+      const chanceFuga = 50; // 50% de chance de fugir
+      if (Math.random() * 100 < chanceFuga) {
+        console.log("\nVocê fugiu do combate!");
+        await salvarPersonagem(jogador);
+        await salvarPersonagem(inimigo);
+        await input({ message: "Pressione Enter para continuar" });
+        return;
+      } else {
+        console.log("\nFalha na fuga!");
+      }
+    }
+
+    // Ataque do jogador
+    inimigo.vida -= jogador.forca;
+    console.log(`\nVocê causou ${jogador.forca} de dano!`);
+
+    // Ataque do inimigo se ainda estiver vivo
+    if (inimigo.vida > 0) {
+      jogador.vida -= inimigo.forca;
+      console.log(`${inimigo.nome} causou ${inimigo.forca} de dano!`);
+    }
+
+    await input({ message: "Pressione Enter para continuar" });
+    console.clear();
+  }
+
+  // Resultado do combate
+  if (jogador.vida <= 0) {
+    console.log("💀 Você foi derrotado!");
+    jogador.vida = 0;
+    await salvarPersonagem(jogador);
+    process.exit(0);
+  } else {
+    console.log(`🎉 ${inimigo.nome} foi derrotado!`);
+    console.log(`Você ganhou ${inimigo.xp_base} XP e ${inimigo.gold} gold!`);
+    
+    // Atualiza jogador
+    jogador.xp_base += inimigo.xp_base;
+    jogador.gold += inimigo.gold;
+    
+    // Level up simples
+    if (jogador.xp_base >= 100 * jogador.nivel) {
+      jogador.nivel++;
+      jogador.vida += 10;
+      console.log(`⭐ Subiu para o nível ${jogador.nivel}!`);
+    }
+
+    inimigo.vida = 0;
+
+    await salvarPersonagem(jogador);
+    await salvarPersonagem(inimigo);
+
+    await input({ message: "Pressione Enter para continuar" });
+  }
+};
 
 const walk = async (player) => {
   if (!player || !player.id) {
@@ -260,8 +345,13 @@ const walk = async (player) => {
   if (answer === "status") {
     taskQueue.enqueue(() => showPlayerStatus(player, walk));
   } else if (answer === "listar_personagens") {
-    await listarPersonagens(player.id_sala);
-    taskQueue.enqueue(() => walk(player));
+      const inimigo = await listarPersonagens(player.id_sala);
+    if (inimigo) {
+      taskQueue.enqueue(() => iniciarCombate(player, inimigo));
+      taskQueue.enqueue(() => walk(player));
+    } else {
+      taskQueue.enqueue(() => walk(player));
+    }
   } else if (answer === "exit") {
     console.log("Saindo do jogo...");
     process.exit(0);
