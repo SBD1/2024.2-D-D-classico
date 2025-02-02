@@ -79,7 +79,11 @@ export const getPlayerCurrentLocation = async (playerId) => {
   return rows;
 };
 
+export const updatePlayerLocation = async (idSala, playerId) => {
+  const updateQuery = 'UPDATE personagem SET id_sala = $1 WHERE id = $2';
+  await client.query(updateQuery, [idSala, playerId]);
 
-export const updatePlayerLocation = async (idSala,playerId) => {
-  await client.query(`UPDATE personagem SET id_sala=${idSala} WHERE id=${playerId};`);
+  const selectQuery = 'SELECT id_sala FROM personagem WHERE id = $1';
+  const result = await client.query(selectQuery, [playerId]);
+  return result.rows[0].id_sala;
 };

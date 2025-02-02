@@ -4,7 +4,7 @@ import { connect } from './db-connection.js';
 import { needSeedTable, seedDBTables } from './sql-loader.js';
 import { select, input } from '@inquirer/prompts';
 import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation } from './entities/personagem.entity.js'
-import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByName } from './playerRepository.js';
+import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByName, getEntitiesInRoom } from './playerRepository.js';
 import taskQueue from './action-queue.js';
 import printDragon from './dragon.js';
 import chalk from 'chalk';
@@ -205,6 +205,23 @@ const showPlayerStatus = async (player, previousMenu) => {
   taskQueue.enqueue(() => previousMenu(player));
 };
 
+const listarPersonagens = async (sala) => {
+  const entities = await getEntitiesInRoom(sala);
+
+  console.clear();
+  console.log("\n=== Personagens na sala ===");
+
+  if (entities.length > 0) {
+    entities.forEach(({ nome, tipo_personagem }) => {
+      console.log(`  - ${nome} (${tipo_personagem})`);
+    });
+  } else {
+    console.log("\n⚠️ Nenhum NPC ou inimigo na sala.");
+  }
+
+  await input({ message: "Pressione Enter para voltar" });
+};
+
 
 const walk = async (player) => {
   if (!player || !player.id) {
@@ -235,19 +252,24 @@ const walk = async (player) => {
         value: i.id
       })),
       { name: "Exibir Status", value: "status" },
+      { name: "Listar personagens na sala", value: "listar_personagens" },
       { name: "Sair do jogo", value: "exit" }
     ],
   });
 
   if (answer === "status") {
     taskQueue.enqueue(() => showPlayerStatus(player, walk));
+  } else if (answer === "listar_personagens") {
+    await listarPersonagens(player.id_sala);
+    taskQueue.enqueue(() => walk(player));
   } else if (answer === "exit") {
     console.log("Saindo do jogo...");
     process.exit(0);
   } else {
-    await updatePlayerLocation(answer, player.id);
+    const novasala_id = await updatePlayerLocation(answer, player.id);
+    player.id_sala = novasala_id; 
     console.clear();
-    taskQueue.enqueue(() => walk(player));
+    taskQueue.enqueue(() => walk(player));  
   }
 };
 

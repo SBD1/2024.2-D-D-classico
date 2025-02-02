@@ -1,4 +1,5 @@
 import client from './db-connection.js';
+import { executeQuery } from './db-connection.js';
 
 export const insertPlayerToDB = async (playerData) => {
     const query = `
@@ -97,3 +98,14 @@ export const getPlayerByName = async (playerName) => {
         return null;
     }
 };
+
+export const getEntitiesInRoom = async (roomId) => {
+    const query = `
+      SELECT nome, tipo_personagem 
+      FROM personagem 
+      WHERE id_sala = $1 
+                AND tipo_personagem IN ('Inimigo', 'Pacífico')
+    `;
+    
+    return await executeQuery(query, [roomId]);
+  };
