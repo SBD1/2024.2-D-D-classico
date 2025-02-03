@@ -318,9 +318,6 @@ const walk = async (player) => {
   if (!player || !player.id) {
     throw new Error("Erro: player está indefinido ou sem ID!");
   }
-
-  console.log(chalk.bold.hex('#FFD700')(`\nVocê está na sala: ${player.salaAtual}`));
-
   // Busca salas disponíveis para movimentação
   const outrasSalas = await getPlayerCurrentLocation(player.id);
   const local = await getPlayerLocal(player.id);
@@ -331,7 +328,7 @@ const walk = async (player) => {
   if (outrasSalas.length > 0) {
     console.log("\n🔹 Salas disponíveis para viajar:");
     outrasSalas.forEach((sala, index) => {
-      console.log(`  ${index + 1}. ${sala.nome} (ID: ${sala.id})`);
+      console.log(`  ${index + 1}. ${sala.nome.substring(0,40)}`);
     });
   } else {
     console.log("\n⚠️ Nenhuma sala disponível para viajar.");
@@ -341,7 +338,7 @@ const walk = async (player) => {
   
  
   const choices = outrasSalas.map(i => ({
-    name: `Ir para ${i.nome}`,
+    name: `Ir para ${i.nome.substring(0,40)}`,
     value: `${i.id}`
   }));
   if (loja && loja.length > 0) {
