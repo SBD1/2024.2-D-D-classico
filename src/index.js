@@ -324,6 +324,7 @@ const walk = async (player) => {
   // Busca salas disponíveis para movimentação
   const outrasSalas = await getPlayerCurrentLocation(player.id);
   const local = await getPlayerLocal(player.id);
+  const loja = await getLojaNaSala(player.id_sala);
   console.clear();
   console.log(chalk.bold.hex('#FFD700')(`\nVocê está atualmente em ${local.substring(0, 40)}`));
 
@@ -337,20 +338,27 @@ const walk = async (player) => {
   }
 
   console.log("\n=== Escolha uma ação ===");
-
+  
+ 
+  const choices = outrasSalas.map(i => ({
+    name: `Ir para ${i.nome}`,
+    value: `${i.id}`
+  }));
+  choices.push({name: "Exibir Status", value: "status" });
+  choices.push({ name:"Listar personagens na sala", value: "listar_personagens" });
+  choices.push({ name:"Visualizar Inventário", value: "inventory"});
+  choices.push({ name:"Mostrar Mapa", value: "mapa" });
+  choices.push({ name: 'Sair do jogo', value: 'exit' });
+  if (loja && loja.length > 0) {
+    loja.forEach(l => {
+      choices.push({ name: `Visitar ${l.nome} (${l.tipo})`, value: `loja_${l.id}` });
+    });
+  }
+  
+ 
   const answer = await select({
     message: "O que deseja fazer?",
-    choices: [
-      ...outrasSalas.map(i => ({
-        name: `Ir para: ${i.nome.substring(0, 40).padEnd(20)}`,
-        value: i.id
-      })),
-      { name: "Exibir Status", value: "status" },
-      { name: "Listar personagens na sala", value: "listar_personagens" },
-      { name: "Visualizar Inventário", value: "inventory" },
-      { name: "Mostrar Mapa", value: "mapa" },
-      { name: "Sair do jogo", value: "exit" }
-    ],
+    choices
   });
 
   if (answer === "status") {
@@ -363,6 +371,10 @@ const walk = async (player) => {
     taskQueue.enqueue(() => walk(player));
   } else if (answer === "inventory") {
     await showInventory(player);
+    taskQueue.enqueue(() => walk(player));
+  } else if (answer.startsWith('loja_')) {
+    const lojaId = parseInt(answer.replace('loja_', '')); // Extrai o ID da loja corretamente
+    await comprarItem(player.id, lojaId);
     taskQueue.enqueue(() => walk(player));
   } else if (answer === "listar_personagens") {
     const inimigo = await listarPersonagens(player.id_sala);

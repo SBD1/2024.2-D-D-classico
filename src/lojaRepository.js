@@ -33,13 +33,6 @@ export const updateLojaEstoque = async (lojaId, itemId, quantidade) => {
 
 
 export const getLojaNaSala = async (salaId) => {
-  try {
-    const res = client.query(`
-        SELECT id, nome, tipo FROM Loja WHERE id_sala = $1
-      `, [salaId]);
-    return res;
-  } catch (err) {
-    console.error('Erro ao buscar Loja:', err);
-    return [];
-  }
-};
+   const res = await client.query(`SELECT id, nome, tipo FROM Loja WHERE id_sala = $1`, [salaId]);
+    return res.rows; 
+  };
