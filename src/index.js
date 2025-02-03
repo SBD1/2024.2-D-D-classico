@@ -320,7 +320,7 @@ const walk = async (player) => {
   const local = await getPlayerLocal(player.id);
 
   console.clear();
-  console.log(`\n=== Você está atualmente em ${local} ===`);
+  console.log(chalk.bold.hex('#FFD700')(`\nVocê está atualmente em ${local.substring(0,40)}`));
 
   if (outrasSalas.length > 0) {
     console.log("\n🔹 Salas disponíveis para viajar:");
@@ -337,7 +337,7 @@ const walk = async (player) => {
     message: "O que deseja fazer?",
     choices: [
       ...outrasSalas.map(i => ({
-        name: `Ir para: ${i.nome}`,
+        name: `Ir para: ${i.nome.substring(0,40).padEnd(20)}`,
         value: i.id
       })),
       { name: "Exibir Status", value: "status" },
