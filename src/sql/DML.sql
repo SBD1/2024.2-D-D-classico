@@ -328,9 +328,8 @@ VALUES
 
     -- Consumíveis
     (9, 'Poção de Cura', 'Consumivel'),
-    (10, 'Poção de Invisibilidade', 'Consumivel'),
-    (11, 'Poção de Força', 'Consumivel'),
-    (12, 'Elixir da Velocidade', 'Consumivel');
+    (10, 'Elixir Revigorante', 'Consumivel'),
+    (11, 'Néctar dos Deuses', 'Consumivel');
 
 INSERT INTO Armadura (id_item, defesa, resistencia, descricao)
 VALUES
@@ -340,10 +339,9 @@ VALUES
 
 INSERT INTO Consumível (id_item, Benefício, descricao)
 VALUES
-    (9, 10, 'Restaura + 2 pontos de vida ao usuário.'),
-    (10, 0, 'Torna o usuário invisível por até 1 hora ou até realizar uma ação ofensiva.'),
-    (11, 5, 'Aumenta temporariamente a força do usuário para 19 por 1 hora.'),
-    (12, 2, 'Dobra a velocidade de movimento e concede uma ação adicional por turno durante 1 minuto.');
+    (9, 80, 'Restaura 80 pontos de vida'),
+    (10, 60, 'Restaura 60 pontos de vida'),
+    (11, 40, 'Restaura 40 pontos de vida');
 
 INSERT INTO Arma (id_item, Dano, descricao)
 VALUES

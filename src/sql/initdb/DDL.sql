@@ -77,8 +77,7 @@ CREATE TABLE IF NOT EXISTS Loja (
 CREATE TABLE IF NOT EXISTS Inventario (
     id SERIAL PRIMARY KEY,
     id_pc int NOT NULL,
-    id_instancia_item int ,
-    capacidade int NOT NULL
+    id_instancia_item int,
 );
 
 CREATE TABLE IF NOT EXISTS Venda (
@@ -250,10 +249,38 @@ END;
 $before_insert_personagem$ LANGUAGE plpgsql;
 
 -- Criando o TRIGGER para acionar a função antes da inserção
-CREATE TRIGGER before_insert_personagem_trigger
+CREATE OR REPLACE TRIGGER before_insert_personagem_trigger
 BEFORE INSERT ON Personagem
 FOR EACH ROW
 EXECUTE FUNCTION before_insert_personagem();
+
+CREATE OR REPLACE FUNCTION inserir_item_no_inventario()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_qtd_itens INT;
+BEGIN
+    -- Verifica a quantidade de itens no inventário do personagem
+    SELECT COUNT(*) INTO v_qtd_itens
+    FROM inventario
+    WHERE id_pc = NEW.id_pc;
+
+    -- Se já houver 20 itens, exibe a mensagem de erro e impede a inserção
+    IF v_qtd_itens >= 20 THEN
+        RAISE EXCEPTION 'Seu inventário já está cheio';
+    ELSE
+        -- Se o limite não for atingido, permite a inserção
+        RETURN NEW;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE TRIGGER trigger_inserir_item_no_inventario
+    BEFORE INSERT ON inventario
+    FOR EACH ROW
+    EXECUTE FUNCTION inserir_item_no_inventario();
+
 
 ALTER TABLE Personagem
 ADD CONSTRAINT unique_nome UNIQUE (nome);
