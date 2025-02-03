@@ -17,7 +17,7 @@ VALUES
     (2, 'Exandria');
 
 
-INSERT INTO Regiao (id, id_mundo, nome, descricao, tipo_região)
+INSERT INTO Regiao (id, id_mundo, nome, descricao, tipo_regiao)
 VALUES
 -- Dungeons
     (1, 1, 'Cidadela Sem Sol', 'Uma antiga fortaleza enterrada sob o solo, lar de goblins e kobolds.', 'D'),

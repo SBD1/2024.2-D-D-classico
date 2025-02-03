@@ -4,7 +4,7 @@ import chalk from 'chalk';
 export const showMap = async (worldId) => {
   // Consulta as salas do mundo com seus respectivos tipos
   const salasQuery = `
-    SELECT s.id, s.nome as sala, r.tipo_região as tipo
+    SELECT s.id, s.nome as sala, r.tipo_regiao as tipo
     FROM Salas s
     JOIN Regiao r ON s.id_regiao = r.id
     WHERE r.id_mundo = $1

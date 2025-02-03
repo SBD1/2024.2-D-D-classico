@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS Regiao (
     id_mundo int NOT NULL,
     nome char(150) NOT NULL,
     descricao char(250) NOT NULL DEFAULT 'Sem Descrição',
-    tipo_região char(1) NOT NULL
+    tipo_regiao char(1) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Salas (
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS Loja (
 CREATE TABLE IF NOT EXISTS Inventario (
     id SERIAL PRIMARY KEY,
     id_pc int NOT NULL,
-    id_instancia_item int,
+    id_instancia_item int
 );
 
 CREATE TABLE IF NOT EXISTS Venda (
@@ -287,41 +287,41 @@ ADD CONSTRAINT unique_nome UNIQUE (nome);
 
 
 -- TRIGGER: GARANTINDO GENERALIZAÇÃO/ESPECIALIZAÇÃO DE Item
-CREATE OR REPLACE FUNCTION item_generalizacao_especializacao()
-RETURNS TRIGGER AS $$
-BEGIN
-    -- Generalização
-    IF NEW.nome IS NULL THEN
-        RAISE EXCEPTION 'Nome do item não pode ser nulo';
-    END IF;
+-- CREATE OR REPLACE FUNCTION item_generalizacao_especializacao()
+-- RETURNS TRIGGER AS $$
+-- BEGIN
+--     -- Generalização
+--     IF NEW.nome IS NULL THEN
+--         RAISE EXCEPTION 'Nome do item não pode ser nulo';
+--     END IF;
 
-    IF NEW.tipo_item IS NULL THEN
-        RAISE EXCEPTION 'Tipo do item não pode ser nulo';
-    END IF;
+--     IF NEW.tipo_item IS NULL THEN
+--         RAISE EXCEPTION 'Tipo do item não pode ser nulo';
+--     END IF;
 
-    -- Especialização
-    IF NEW.tipo_item = 'Armadura' THEN
-        IF NOT (NEW.atributos ? 'defesa') THEN
-            RAISE EXCEPTION 'Itens do tipo Armadura devem conter atributo de defesa';
-        END IF;
-    ELSIF NEW.tipo_item = 'Arma' THEN
-        IF NOT (NEW.atributos ? 'dano') THEN
-            RAISE EXCEPTION 'Itens do tipo Arma devem conter atributo de dano';
-        END IF;
-    ELSIF NEW.tipo_item = 'Consumivel' THEN
-        IF NOT (NEW.atributos ? 'efeito') THEN
-            RAISE EXCEPTION 'Itens do tipo Consumivel devem conter atributo de efeito';
-        END IF;
-    END IF;
+--     -- Especialização
+--     IF NEW.tipo_item = 'Armadura' THEN
+--         IF NOT (NEW.atributos ? 'defesa') THEN
+--             RAISE EXCEPTION 'Itens do tipo Armadura devem conter atributo de defesa';
+--         END IF;
+--     ELSIF NEW.tipo_item = 'Arma' THEN
+--         IF NOT (NEW.atributos ? 'dano') THEN
+--             RAISE EXCEPTION 'Itens do tipo Arma devem conter atributo de dano';
+--         END IF;
+--     ELSIF NEW.tipo_item = 'Consumivel' THEN
+--         IF NOT (NEW.atributos ? 'efeito') THEN
+--             RAISE EXCEPTION 'Itens do tipo Consumivel devem conter atributo de efeito';
+--         END IF;
+--     END IF;
 
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
+--     RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_item_generalizacao_especializacao
-BEFORE INSERT OR UPDATE ON Item
-FOR EACH ROW
-EXECUTE FUNCTION item_generalizacao_especializacao();
+-- CREATE TRIGGER trg_item_generalizacao_especializacao
+-- BEFORE INSERT OR UPDATE ON Item
+-- FOR EACH ROW
+-- EXECUTE FUNCTION item_generalizacao_especializacao();
 
 
 -- TRIGGER: CAPACIDADE DO Inventario
@@ -408,9 +408,10 @@ RETURNS TRIGGER AS $$
 DECLARE
     tipo_regiao CHAR(1);
 BEGIN
-    SELECT tipo_regiao INTO tipo_regiao
-    FROM Regiao
-    WHERE id = NEW.id_regiao;
+    SELECT r.tipo_regiao INTO tipo_regiao
+    FROM Regiao r
+    INNER JOIN Salas s on s.id_regiao = r.id
+    WHERE s.id = NEW.id_sala;
 
     IF NEW.tipo_personagem = 'Inimigo' AND tipo_regiao = 'C' THEN
         RAISE EXCEPTION 'Personagens do tipo "Inimigo" não podem ser inseridos em regiões do tipo "Cidade"';
@@ -480,7 +481,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_bloquear_movimento_para_sala_66
 BEFORE INSERT OR UPDATE ON Personagem
 FOR EACH ROW
-WHEN (NEW.id_regiao = 66) 
+WHEN (NEW.id_sala = 66) 
 EXECUTE FUNCTION bloquear_movimento_para_sala_66();
 
 CREATE OR REPLACE FUNCTION remover_pc_morto() 
