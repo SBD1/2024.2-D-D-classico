@@ -3,7 +3,7 @@
 import { connect } from './db-connection.js';
 import { needSeedTable, seedDBTables } from './sql-loader.js';
 import { select, input } from '@inquirer/prompts';
-import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation } from './entities/personagem.entity.js'
+import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation, getPlayerLocal } from './entities/personagem.entity.js'
 import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByName, getEntitiesInRoom, salvarPersonagem} from './playerRepository.js';
 import taskQueue from './action-queue.js';
 import printDragon from './dragon.js';
@@ -317,9 +317,10 @@ const walk = async (player) => {
   }
 
   const outrasSalas = await getPlayerCurrentLocation(player.id);
+  const local = await getPlayerLocal(player.id);
 
   console.clear();
-  console.log(`\n=== Você está atualmente em uma sala ===`);
+  console.log(`\n=== Você está atualmente em ${local} ===`);
 
   if (outrasSalas.length > 0) {
     console.log("\n🔹 Salas disponíveis para viajar:");
