@@ -4,7 +4,7 @@ import { connect } from './db-connection.js';
 import { needSeedTable, seedDBTables } from './sql-loader.js';
 import { select, input } from '@inquirer/prompts';
 import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation } from './entities/personagem.entity.js'
-import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByName, getEntitiesInRoom } from './playerRepository.js';
+import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByName, getEntitiesInRoom, getPlayerInventory, getPlayerInventoryCount } from './playerRepository.js';
 import taskQueue from './action-queue.js';
 import printDragon from './dragon.js';
 import chalk from 'chalk';
@@ -253,6 +253,7 @@ const walk = async (player) => {
       })),
       { name: "Exibir Status", value: "status" },
       { name: "Listar personagens na sala", value: "listar_personagens" },
+      { name: "Visualizar Inventário", value: "inventory" },
       { name: "Sair do jogo", value: "exit" }
     ],
   });
@@ -262,16 +263,42 @@ const walk = async (player) => {
   } else if (answer === "listar_personagens") {
     await listarPersonagens(player.id_sala);
     taskQueue.enqueue(() => walk(player));
+  } else if (answer === "inventory") {
+    await showInventory(player);
+    taskQueue.enqueue(() => walk(player));
   } else if (answer === "exit") {
     console.log("Saindo do jogo...");
     process.exit(0);
   } else {
     const novasala_id = await updatePlayerLocation(answer, player.id);
-    player.id_sala = novasala_id; 
+    player.id_sala = novasala_id;
     console.clear();
-    taskQueue.enqueue(() => walk(player));  
+    taskQueue.enqueue(() => walk(player));
   }
 };
+
+
+const showInventory = async (player) => {
+  // Recupera os itens do inventário do banco de dados
+  const inventory = await getPlayerInventory(player.id);
+
+  if (!inventory || inventory.length === 0) {
+    console.log("Erro ao buscar inventário ou inventário vazio!");
+  } else {
+    console.log(chalk.bold.hex('#FFD700')("\n=== INVENTÁRIO DO JOGADOR ==="));
+    inventory.forEach((item, index) => {
+      console.log(`${index + 1}. ${item.nome} (Quantidade: ${item.quantidade})`);
+    });
+  }
+
+  // Obtém a capacidade atual do inventário (ex: 5/10)
+  const inventoryCapacity = await getPlayerInventoryCount(player.id);
+  console.log(`Capacidade: ${inventoryCapacity}/20`);
+
+  await input({ message: "Pressione Enter para continuar..." });
+};
+
+
 
 await welcome();
 taskQueue.enqueue(mainMenu);

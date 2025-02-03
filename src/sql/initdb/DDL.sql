@@ -77,8 +77,7 @@ CREATE TABLE IF NOT EXISTS Loja (
 CREATE TABLE IF NOT EXISTS Inventario (
     id SERIAL PRIMARY KEY,
     id_pc int NOT NULL,
-    id_instancia_item int ,
-    capacidade int NOT NULL
+    id_instancia_item int,
 );
 
 CREATE TABLE IF NOT EXISTS Venda (

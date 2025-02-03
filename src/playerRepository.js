@@ -106,6 +106,53 @@ export const getEntitiesInRoom = async (roomId) => {
       WHERE id_sala = $1 
                 AND tipo_personagem IN ('Inimigo', 'Pacífico')
     `;
-    
+
     return await executeQuery(query, [roomId]);
-  };
+};
+
+// playerRepository.js
+export const getPlayerInventory = async (playerId) => {
+    try {
+        const res = await client.query(
+            `SELECT it.nome AS nome, COUNT(inv.id_instancia_item) AS quantidade
+             FROM inventario inv
+             JOIN inst_item ii ON inv.id_instancia_item = ii.id
+             JOIN item it ON ii.id_item = it.id
+             WHERE inv.id_pc = $1
+             GROUP BY it.nome`,
+            [playerId]
+        );
+
+        if (res.rows.length === 0) {
+            console.log("Inventário Vazio");
+            return null;
+        }
+
+        return res.rows;
+    } catch (error) {
+        console.error("Erro ao buscar inventário do personagem:", error);
+        return null;
+    }
+};
+
+
+
+
+export const getPlayerInventoryCount = async (playerId) => {
+    try {
+        const res = await client.query(
+            `SELECT COUNT(*) AS count
+             FROM inventario 
+             WHERE id_pc = $1`,
+            [playerId]
+        );
+
+        // A quantidade de itens é retornada em res.rows[0].count
+        return res.rows[0].count;
+    } catch (error) {
+        console.error("Erro ao contar inventário do personagem:", error);
+        return null;
+    }
+};
+
+
