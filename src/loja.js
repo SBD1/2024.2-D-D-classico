@@ -3,15 +3,9 @@ import { getPlayerGold, updatePlayerGold, addItemToInventory } from './playerRep
 import { getLojaItens, updateLojaEstoque,getLojas } from './lojaRepository.js';
 import chalk from 'chalk';
 
-export const comprarItem = async (playerId) => {
+export const comprarItem = async (playerId,lojaId) => {
   console.log(playerId)
-  // 1️⃣ Listar lojas disponíveis
-  console.log(chalk.bold.hex('#FFA500')("=== Lojas disponíveis ==="));
-  const lojas = await getLojas(); // Função que busca todas as lojas
-  lojas.forEach(({ id, nome, tipo }) => console.log(`${id}: ${nome} (${tipo})`));
-
-  const lojaId = await input({ message: 'Digite o ID da loja que deseja visitar:', required: true });
-
+  
   // 2️⃣ Buscar itens da loja
   const itens = await getLojaItens(lojaId);
   if (itens.length === 0) {
