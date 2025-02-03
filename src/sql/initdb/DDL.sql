@@ -456,6 +456,23 @@ FOR EACH ROW
 WHEN (NEW.id_regiao = 66) 
 EXECUTE FUNCTION bloquear_movimento_para_sala_66();
 
+CREATE OR REPLACE FUNCTION remover_pc_morto() 
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.tipo_personagem = 'PC' AND NEW.vida <= 0 THEN
+        DELETE FROM Personagem WHERE id = NEW.id;
+    END IF;
+    RETURN NULL; -- Retorna NULL porque o DELETE já removeu a linha
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_remover_pc_morto
+AFTER UPDATE OF vida ON Personagem
+FOR EACH ROW
+WHEN (NEW.vida <= 0 AND NEW.tipo_personagem = 'PC')
+EXECUTE FUNCTION remover_pc_morto();
+
+
 -- Keys
 
 ALTER TABLE Salas ADD CONSTRAINT "FK_01" FOREIGN KEY (id_regiao) REFERENCES Regiao (id);
