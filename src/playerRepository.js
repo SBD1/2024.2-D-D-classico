@@ -127,7 +127,7 @@ export const getPlayerByName = async (playerName) => {
     }
 };
 
-export const getEntitiesInRoom = async (roomId) => {
+export const getEnemiesInRoom = async (roomId) => {
     const query = `
       SELECT 
         id, 
@@ -140,7 +140,7 @@ export const getEntitiesInRoom = async (roomId) => {
         gold
       FROM Personagem 
       WHERE id_sala = $1 
-        AND tipo_personagem IN ('Inimigo', 'Pacífico')
+        AND tipo_personagem IN ('Inimigo')
         AND vida > 0;
     `;
 

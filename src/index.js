@@ -6,7 +6,7 @@ import { getLojaNaSala } from './lojaRepository.js';
 import { needSeedTable, seedDBTables } from './sql-loader.js';
 import { select, input } from '@inquirer/prompts';
 import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation, getPlayerLocal } from './entities/personagem.entity.js'
-import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByName, getEntitiesInRoom, getPlayerInventory, getPlayerInventoryCount, salvarPersonagem } from './playerRepository.js';
+import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByName, getEnemiesInRoom, getPlayerInventory, getPlayerInventoryCount, salvarPersonagem } from './playerRepository.js';
 import taskQueue from './action-queue.js';
 import printDragon from './dragon.js';
 import chalk from 'chalk';
@@ -211,8 +211,8 @@ const showPlayerStatus = async (player, previousMenu) => {
   taskQueue.enqueue(() => previousMenu(player));
 };
 
-const listarPersonagens = async (salaId) => {
-  const entities = await getEntitiesInRoom(salaId);
+const listarInimigos = async (salaId) => {
+  const entities = await getEnemiesInRoom(salaId);
 
   if (entities.length === 0) {
     console.clear();
@@ -225,7 +225,7 @@ const listarPersonagens = async (salaId) => {
     message: "Selecione um inimigo para lutar:",
     choices: [
       ...entities.map(entity => ({
-        name: `${entity.nome} (${entity.tipo_personagem}) [${entity.nivel}]`,
+        name: `${entity.nome} (${entity.tipo_personagem}) [lvl. ${entity.nivel}]`,
         value: entity
       })),
       { name: "Voltar", value: null }
@@ -350,7 +350,7 @@ const walk = async (player) => {
     });
   }
   choices.push({name: "Exibir Status", value: "status" });
-  choices.push({ name:"Listar personagens na sala", value: "listar_personagens" });
+  choices.push({ name:"Ver inimigos na sala", value: "listar_inimigos" });
   choices.push({ name:"Visualizar Inventário", value: "inventory"});
   choices.push({ name:"Mostrar Mapa", value: "mapa" });
   choices.push({ name: 'Sair do jogo', value: 'exit' });
@@ -377,8 +377,8 @@ const walk = async (player) => {
     const lojaId = parseInt(answer.replace('loja_', '')); // Extrai o ID da loja corretamente
     await comprarItem(player.id, lojaId);
     taskQueue.enqueue(() => walk(player));
-  } else if (answer === "listar_personagens") {
-    const inimigo = await listarPersonagens(player.id_sala);
+  } else if (answer === "listar_inimigos") {
+    const inimigo = await listarInimigos(player.id_sala);
     if (inimigo) {
       taskQueue.enqueue(() => iniciarCombate(player, inimigo));
       taskQueue.enqueue(() => walk(player));
