@@ -36,6 +36,8 @@ VALUES
     (10, 2, 'Neverwinter', 'Uma cidade mágica conhecida como a "Jóia do Norte".', 'C'),
     (11, 2, 'Silverymoon', 'Uma cidade élfica dedicada à magia e ao aprendizado.', 'C');
 
+-- Inferno
+    (66, 1, 'Inferno', 'Somente para os mortos.', 'D');
 
 INSERT INTO Salas (id, id_regiao, nome)
 VALUES
