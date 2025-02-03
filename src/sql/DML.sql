@@ -250,19 +250,19 @@ VALUES
     (14, 4, 'Druida dos Sons da Natureza', 16, 'Inimigo', 75, 7, 0, 11, 11, 10, 12, 17, 13, 85),
     (15, 1, 'Bárbaro da Batida Tribal', 7, 'Inimigo', 95, 8, 0, 10, 8, 18, 15, 7, 9, 125);
 
--- Donos das lojas em Águas Profundas
+-- Donos das lojas
     ( 15, 5, 'Tharion, o Mestre do Couro', 3, 'Pacífico', 60, 5, 0, 10, 14, 12, 10, 12, 10, 200), -- Amadureiro
     ( 16, 6, 'Kael, o Forjador', 4, 'Pacífico', 80, 7, 0, 11, 10, 15, 14, 12, 9, 300);          -- Armeiro
 
--- Donos das lojas em Baldur’s Gate
+-- Donos das lojas
     ( 17, 7, 'Lorien, o Viajante', 2, 'Pacífico', 50, 4, 0, 12, 13, 10, 10, 11, 14, 150),       -- Amadureiro
     ( 18, 8, 'Arwyn, o Alquimista', 6, 'Pacífico', 55, 6, 0, 11, 12, 9, 10, 13, 15, 250);        -- Alquimista
 
--- Donos das lojas em Neverwinter
+-- Donos das lojas
     (19, 9, 'Darian, o Ferreiro', 5, 'Pacífico', 75, 6, 0, 10, 9, 14, 13, 10, 11, 300),        -- Armeiro
     (20, 10, 'Elyra, a Mística', 11, 'Pacífico', 65, 5, 0, 12, 14, 8, 10, 12, 16, 400);        -- Alquimista
 
--- Donos das lojas em Silverymoon
+-- Donos das lojas
     ( 21, 11, 'Nerion, o Caçador de Tesouros', 8, 'Pacífico', 70, 6, 0, 13, 12, 12, 11, 12, 15, 350), -- Amadureiro
     ( 22, 12, 'Vaylin, o Espadachim', 9, 'Pacífico', 85, 7, 0, 10, 11, 16, 14, 10, 10, 500);          -- Armeiro
 
@@ -294,20 +294,11 @@ INSERT INTO Loja (dono, tipo, nome, id_sala)
 VALUES
 -- Lojas em Águas Profundas
     (1, 'Amadureiro', 'O Alforge do Destino', 15), 
-    (2, 'Armeiro', 'Forja do Dragão', 16);        
-
-
--- Lojas em Baldur’s Gate
+    (2, 'Armeiro', 'Forja do Dragão', 16),        
     (3, 'Amadureiro', 'Mercado das Maravilhas', 17), 
-    (4, 'Alquimista', 'Laboratório Místico', 18);    
-
-
--- Lojas em Neverwinter
+    (4, 'Alquimista', 'Laboratório Místico', 18),   
     (5, 'Armeiro', 'Aço Glorioso', 19), 
-    (6, 'Alquimista', 'Poções do Norte', 20);
-
-
--- Lojas em Silverymoon
+    (6, 'Alquimista', 'Poções do Norte', 20),
     (7, 'Amadureiro', 'Tesouros de Silverymoon', 21), 
     (8, 'Armeiro', 'A Lâmina Reluzente', 22);
 
