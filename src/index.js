@@ -1,6 +1,8 @@
 #! /usr/bin/env node
 
 import { connect } from './db-connection.js';
+import { comprarItem } from './loja.js';
+import { getLojaNaSala } from './lojaRepository.js';
 import { needSeedTable, seedDBTables } from './sql-loader.js';
 import { select, input } from '@inquirer/prompts';
 import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation, getPlayerLocal } from './entities/personagem.entity.js'
@@ -8,6 +10,7 @@ import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByNam
 import taskQueue from './action-queue.js';
 import printDragon from './dragon.js';
 import chalk from 'chalk';
+import { startMission,completeMission } from './missao.js';
 import { chooseWorld, getWorldByPlayerId, getRandomSalaForWorld } from './worldRepository.js';
 import { showMap } from './map.entity.js';
 // import inquirer from 'inquirer'; 
@@ -316,9 +319,11 @@ const walk = async (player) => {
     throw new Error("Erro: player está indefinido ou sem ID!");
   }
 
+  console.log(chalk.bold.hex('#FFD700')(`\nVocê está na sala: ${player.salaAtual}`));
+
+  // Busca salas disponíveis para movimentação
   const outrasSalas = await getPlayerCurrentLocation(player.id);
   const local = await getPlayerLocal(player.id);
-
   console.clear();
   console.log(chalk.bold.hex('#FFD700')(`\nVocê está atualmente em ${local.substring(0, 40)}`));
 
