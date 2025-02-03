@@ -347,24 +347,19 @@ EXECUTE FUNCTION loot_somente_para_inimigos();
 CREATE OR REPLACE FUNCTION regiao_valida_tipo()
 RETURNS TRIGGER AS $$
 BEGIN
-    -- Garantir que o tipo de região seja um dos valores permitidos
     IF NEW.tipo_regiao NOT IN ('C', 'F', 'D') THEN
         RAISE EXCEPTION 'Tipo de região inválido. Deve ser "C" (Cidade), "F" (Floresta) ou "D" (Dungeon)';
     END IF;
 
-    -- Especialização total: verificação de regras adicionais dependendo do tipo
     IF NEW.tipo_regiao = 'C' THEN
-        -- Exemplo: Se for uma cidade, podemos verificar se há um campo 'populacao' preenchido (se existir)
         IF NEW.descricao IS NULL THEN
             RAISE EXCEPTION 'Cidades devem ter uma descrição preenchida.';
         END IF;
     ELSIF NEW.tipo_regiao = 'F' THEN
-        -- Exemplo: Florestas podem precisar de uma descrição como tamanho ou biodiversidade
         IF NEW.descricao IS NULL THEN
             RAISE EXCEPTION 'Florestas devem ter uma descrição preenchida.';
         END IF;
     ELSIF NEW.tipo_regiao = 'D' THEN
-        -- Exemplo: Dungeons podem exigir um nível de dificuldade ou descrição específica
         IF NEW.descricao IS NULL THEN
             RAISE EXCEPTION 'Dungeons devem ter uma descrição preenchida.';
         END IF;
