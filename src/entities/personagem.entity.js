@@ -45,6 +45,17 @@ export const registerPlayer = async (name) => {
   return formatedPLayer;
 };
 
+export const getPlayerLocal = async (playerId) => {
+  const { rows: currentLocation } = await client.query(
+      `SELECT r.*, s.nome as sala  FROM regiao r 
+      INNER JOIN salas s on r.id = s.id_regiao
+      INNER JOIN personagem p on p.id_sala = s.id
+      WHERE p.id = $1`,
+      [playerId]
+  );
+  return currentLocation[0].sala;
+}
+
 export const getPlayerCurrentLocation = async (playerId) => {
   const { rows: currentLocation } = await client.query(
       `SELECT r.*, s.nome as sala  FROM regiao r 
