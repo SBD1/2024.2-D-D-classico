@@ -1,4 +1,5 @@
 import client from './db-connection.js';
+import { executeQuery } from './db-connection.js';
 
 export const insertPlayerToDB = async (playerData) => {
     const query = `
@@ -22,10 +23,15 @@ export const insertPlayerToDB = async (playerData) => {
 
     try {
         const res = await client.query(query, values);
-        return res.rows[0];
+        return res.rows[0]; // Retorna o personagem criado
     } catch (err) {
-        console.error('Erro ao inserir jogador:', err);
-        throw err;
+        if (err.code === '23505') { // Verifica se o erro é de violação de chave única
+            console.error('Já existe um personagem com este nome, escolha um novo!');
+            throw new Error('Nome de personagem já existente.'); // Lança erro específico
+        } else {
+            console.error('Erro ao inserir jogador:', err);
+            throw err; // Rethrow se o erro for diferente
+        }
     }
 };
 
@@ -48,6 +54,7 @@ export const getClasses = async () => {
         return [];
     }
 };
+
 
 export const getPlayerGold = async (playerId) => {
     const result = await client.query("SELECT gold FROM Personagem WHERE id = $1", [playerId]);
@@ -75,3 +82,132 @@ export const getPlayerGold = async (playerId) => {
         return;
     }
   };
+
+export const getPlayerStatus = async (playerId) => {
+    try {
+        const { rows } = await client.query(
+            `SELECT nome, vida, nivel, xp_base, destreza, carisma, forca, 
+                    constituicao, sabedoria, inteligencia, gold 
+             FROM Personagem 
+             WHERE id = $1`,
+            [playerId]
+        );
+
+        if (rows.length === 0) {
+            console.log("Personagem não encontrado.");
+            return null;
+        }
+
+        return rows[0];
+    } catch (error) {
+        console.error("Erro ao buscar status do personagem:", error);
+        return null;
+    }
+};
+
+export const getPlayerByName = async (playerName) => {
+    try {
+        const { rows } = await client.query(
+            `SELECT id, nome, vida, nivel, xp_base, destreza, carisma, forca, 
+                    constituicao, sabedoria, inteligencia, gold 
+             FROM Personagem 
+             WHERE nome = $1`,
+            [playerName]
+        );
+
+        if (rows.length === 0) {
+            console.log("Personagem não encontrado.");
+            return null;
+        }
+
+        return rows[0];
+    } catch (error) {
+        console.error("Erro ao buscar personagem por nome:", error);
+        return null;
+    }
+};
+
+export const getEntitiesInRoom = async (roomId) => {
+    const query = `
+      SELECT 
+        id, 
+        nome,
+        tipo_personagem,
+        nivel,
+        forca,
+        vida,
+        xp_base,
+        gold
+      FROM Personagem 
+      WHERE id_sala = $1 
+        AND tipo_personagem IN ('Inimigo', 'Pacífico')
+        AND vida > 0;
+    `;
+
+
+    return await executeQuery(query, [roomId]);
+};
+
+// playerRepository.js
+export const getPlayerInventory = async (playerId) => {
+    try {
+        const res = await client.query(
+            `SELECT it.nome AS nome, COUNT(inv.id_instancia_item) AS quantidade
+             FROM inventario inv
+             JOIN inst_item ii ON inv.id_instancia_item = ii.id
+             JOIN item it ON ii.id_item = it.id
+             WHERE inv.id_pc = $1
+             GROUP BY it.nome`,
+            [playerId]
+        );
+
+        if (res.rows.length === 0) {
+            console.log("Inventário Vazio");
+            return null;
+        }
+
+        return res.rows;
+    } catch (error) {
+        console.error("Erro ao buscar inventário do personagem:", error);
+        return null;
+    }
+};
+
+
+
+
+export const getPlayerInventoryCount = async (playerId) => {
+    try {
+        const res = await client.query(
+            `SELECT COUNT(*) AS count
+             FROM inventario 
+             WHERE id_pc = $1`,
+            [playerId]
+        );
+
+        // A quantidade de itens é retornada em res.rows[0].count
+        return res.rows[0].count;
+    } catch (error) {
+        console.error("Erro ao contar inventário do personagem:", error);
+        return null;
+    }
+};
+
+export const salvarPersonagem = async (personagem) => {
+    try {
+        await executeQuery(
+            `UPDATE Personagem
+         SET nivel = $1, 
+             vida = $2, 
+             xp_base = $3, 
+             gold = $4 
+         WHERE id = $5`,
+            [personagem.nivel, personagem.vida, personagem.xp_base, personagem.gold, personagem.id]
+        );
+
+    } catch (error) {
+        console.error("Erro ao salvar personagem:", error);
+        throw error;
+    }
+};
+

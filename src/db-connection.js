@@ -93,5 +93,19 @@ export const transactions = async (executeFunction) => {
   }
 }
 
+export const executeQuery = async (query, params = []) => {
+  const poolClient = await poolConection.connect(); 
+
+  try {
+    const result = await poolClient.query(query, params);
+    return result.rows; 
+  } catch (error) {
+    console.error("Erro ao executar query:", error);
+    throw error;
+  } finally {
+    poolClient.release(); 
+  }
+}
+
 
 export default client

@@ -5,13 +5,14 @@ import { comprarItem } from './loja.js';
 import { getLojaNaSala } from './lojaRepository.js';
 import { needSeedTable, seedDBTables } from './sql-loader.js';
 import { select, input } from '@inquirer/prompts';
-import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation } from './entities/personagem.entity.js'
-import { insertPlayerToDB, getRacas, getClasses } from './playerRepository.js';
+import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation, getPlayerLocal } from './entities/personagem.entity.js'
+import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByName, getEntitiesInRoom, getPlayerInventory, getPlayerInventoryCount, salvarPersonagem } from './playerRepository.js';
 import taskQueue from './action-queue.js';
 import printDragon from './dragon.js';
 import chalk from 'chalk';
-
 import { startMission,completeMission } from './missao.js';
+import { chooseWorld, getWorldByPlayerId, getRandomSalaForWorld } from './worldRepository.js';
+import { showMap } from './map.entity.js';
 // import inquirer from 'inquirer'; 
 // import gradient from 'gradient-string';
 // import chalkAnimation from 'chalk-animation';
@@ -34,24 +35,44 @@ const welcome = async () => {
 }
 
 const mainMenu = async () => {
-  console.log('Bem vindo ao D&D classico\n');
-  printDragon()
+  console.log('Bem vindo ao D&D Clássico\n');
+  printDragon();
 
   const answer = await select({
     message: 'Escolha o que quer fazer',
     choices: [
+      { name: 'Cadastrar', value: 'register' },
+      { name: 'Entrar', value: 'login' },
       { name: 'Sair', value: 'exit' },
-      { name: 'Entrar', value: 'enter' },
     ]
   });
 
   if (answer === 'exit') {
-    console.log("Saindo");
+    console.log("Saindo...");
     process.exit(0);
-  } else {
+  } else if (answer === 'register') {
     taskQueue.enqueue(registerPlayerOption);
+  } else if (answer === 'login') {
+    taskQueue.enqueue(loginPlayer);
   }
 };
+
+const loginPlayer = async () => {
+  const name = await input({ message: 'Digite o nome do seu personagem:' });
+
+  const playerData = await getPlayerByName(name);
+
+  if (!playerData) {
+    console.log(chalk.red("Personagem não encontrado! Tente novamente."));
+    taskQueue.enqueue(mainMenu);
+    return;
+  }
+
+  console.log(chalk.green(`Bem-vindo de volta, ${playerData.nome}!`));
+  taskQueue.enqueue(() => walk(playerData));
+};
+
+
 
 const registerPlayerOption = async () => {
   console.log(chalk.bold.hex('#FF6347')("=== ETAPA 1 - Escolha a raça do seu personagem ==="));
@@ -120,41 +141,178 @@ const registerPlayerOption = async () => {
       }
     }
   }
+  const worldId = await chooseWorld(); // o jogador escolhe o mundo
+  const randomSala = await getRandomSalaForWorld(worldId); // sala aleatória para o mundo escolhido
+  let name;
+  let playerCreated = false;
+  while (!playerCreated) {
+    name = await input({
+      message: 'Qual o nome do seu personagem?',
+      default: 'Player',
+      required: true
+    });
 
-  const name = await input({
-    message: 'Qual o nome do seu personagem?',
-    default: 'Player',
-    required: true
-  });
+    try {
+      const playerData = {
+        id_sala: randomSala.id,
+        id_classe: parseInt(id_classe),
+        nome: name,
+        id_raca: parseInt(id_raca),
+        tipo_personagem: 'PC',
+        vida: 100,
+        nivel: 1,
+        xp_base: classes.find(c => c.id === parseInt(id_classe)).xp_base,
+        destreza: classes.find(c => c.id === parseInt(id_classe)).destreza,
+        carisma: classes.find(c => c.id === parseInt(id_classe)).carisma,
+        forca: classes.find(c => c.id === parseInt(id_classe)).forca,
+        constituicao: classes.find(c => c.id === parseInt(id_classe)).constituicao,
+        sabedoria: classes.find(c => c.id === parseInt(id_classe)).sabedoria,
+        inteligencia: classes.find(c => c.id === parseInt(id_classe)).inteligencia,
+        gold: 10,
+      };
 
-  const playerData = {
-    id_sala: 1,
-    id_classe: parseInt(id_classe),
-    nome: name,
-    id_raca: parseInt(id_raca),
-    tipo_personagem: 'PC',
-    vida: 100,
-    nivel: 1,
-    xp_base: classes.find(c => c.id === parseInt(id_classe)).xp_base,
-    destreza: classes.find(c => c.id === parseInt(id_classe)).destreza,
-    carisma: classes.find(c => c.id === parseInt(id_classe)).carisma,
-    forca: classes.find(c => c.id === parseInt(id_classe)).forca,
-    constituicao: classes.find(c => c.id === parseInt(id_classe)).constituicao,
-    sabedoria: classes.find(c => c.id === parseInt(id_classe)).sabedoria,
-    inteligencia: classes.find(c => c.id === parseInt(id_classe)).inteligencia,
-    gold: 10,
-  };
+      // Tenta inserir o jogador no banco de dados
+      const player = await insertPlayerToDB(playerData);
+      console.log("\nSeu personagem foi criado com sucesso:");
+      console.log(`Nome: ${player.nome}`);
+      Object.entries(player).forEach(([key, value]) => {
+        if (key !== "id") console.log(`${key}: ${value}`);
+      });
 
-  const player = await insertPlayerToDB(playerData);
-  console.log("\nSeu personagem foi criado com sucesso:");
-  Object.entries(player).forEach(([key, value]) => {
-    if (key !== "id") console.log(`${key}: ${value}`);
-  });
-
-  taskQueue.enqueue(() => walk(player));
+      playerCreated = true;
+      taskQueue.enqueue(() => walk(player));
+    } catch (error) {
+      if (error.message === 'Nome de personagem já existente.') {
+        // Se o erro for de duplicidade
+        console.log(chalk.bold.hex('#FF6347')("Tente Novamente:"));
+      } else {
+        console.error("Erro ao criar personagem:", error);
+      }
+    }
+  }
 };
 
+const showPlayerStatus = async (player, previousMenu) => {
+  if (!player || !player.id) {
+    console.log("Nenhum jogador encontrado.");
+    return;
+  }
 
+  const status = await getPlayerStatus(player.id);
+  if (!status) return;
+
+  console.log(chalk.bold.hex('#FFD700')("\n=== STATUS DO PERSONAGEM ==="));
+  Object.entries(status).forEach(([key, value]) => {
+    console.log(`${key.toUpperCase()}: ${value}`);
+  });
+
+  await input({ message: "Pressione Enter para continuar..." });
+
+  taskQueue.enqueue(() => previousMenu(player));
+};
+
+const listarPersonagens = async (salaId) => {
+  const entities = await getEntitiesInRoom(salaId);
+
+  if (entities.length === 0) {
+    console.clear();
+    console.log("\n⚠️ Nenhum inimigo nesta sala!");
+    await input({ message: "Pressione Enter para voltar" });
+    return null;
+  }
+
+  const escolha = await select({
+    message: "Selecione um inimigo para lutar:",
+    choices: [
+      ...entities.map(entity => ({
+        name: `${entity.nome} (${entity.tipo_personagem}) [${entity.nivel}]`,
+        value: entity
+      })),
+      { name: "Voltar", value: null }
+    ],
+    pageSize: 5 // Mostra 5 opções por vez
+  });
+
+  return escolha;
+};
+
+const iniciarCombate = async (jogador, inimigo) => {
+  if (!inimigo?.id) {
+    throw new Error("Inimigo sem ID válido!");
+  }
+
+  console.clear();
+  console.log(`⚔️ Combate contra ${inimigo.nome} (Nível ${inimigo.nivel}) ⚔️\n`);
+
+  while (jogador.vida > 0 && inimigo.vida > 0) {
+    console.log(`Jogador: ${jogador.vida} HP`);
+    console.log(`Inimigo: ${inimigo.vida} HP\n`);
+
+    // Turno do jogador
+    const acao = await select({
+      message: "Escolha uma ação:",
+      choices: [
+        { name: "Atacar", value: "atacar" },
+        { name: "Fugir", value: "fugir" }
+      ]
+    });
+
+    if (acao === "fugir") {
+      const chanceFuga = 50; // 50% de chance de fugir
+      if (Math.random() * 100 < chanceFuga) {
+        console.log("\nVocê fugiu do combate!");
+        await salvarPersonagem(jogador);
+        await salvarPersonagem(inimigo);
+        await input({ message: "Pressione Enter para continuar" });
+        return;
+      } else {
+        console.log("\nFalha na fuga!");
+      }
+    }
+
+    // Ataque do jogador
+    inimigo.vida -= jogador.forca;
+    console.log(`\nVocê causou ${jogador.forca} de dano!`);
+
+    // Ataque do inimigo se ainda estiver vivo
+    if (inimigo.vida > 0) {
+      jogador.vida -= inimigo.forca;
+      console.log(`${inimigo.nome} causou ${inimigo.forca} de dano!`);
+    }
+
+    await input({ message: "Pressione Enter para continuar" });
+    console.clear();
+  }
+
+  // Resultado do combate
+  if (jogador.vida <= 0) {
+    console.log("💀 Você foi derrotado!");
+    jogador.vida = 0;
+    await salvarPersonagem(jogador);
+    process.exit(0);
+  } else {
+    console.log(`🎉 ${inimigo.nome} foi derrotado!`);
+    console.log(`Você ganhou ${inimigo.xp_base} XP e ${inimigo.gold} gold!`);
+
+    // Atualiza jogador
+    jogador.xp_base += inimigo.xp_base;
+    jogador.gold += inimigo.gold;
+
+    // Level up simples
+    if (jogador.xp_base >= 100 * jogador.nivel) {
+      jogador.nivel++;
+      jogador.vida += 10;
+      console.log(`⭐ Subiu para o nível ${jogador.nivel}!`);
+    }
+
+    inimigo.vida = 0;
+
+    await salvarPersonagem(jogador);
+    await salvarPersonagem(inimigo);
+
+    await input({ message: "Pressione Enter para continuar" });
+  }
+};
 
 const walk = async (player) => {
   if (!player || !player.id) {
@@ -165,54 +323,87 @@ const walk = async (player) => {
 
   // Busca salas disponíveis para movimentação
   const outrasSalas = await getPlayerCurrentLocation(player.id);
+  const local = await getPlayerLocal(player.id);
+  console.clear();
+  console.log(chalk.bold.hex('#FFD700')(`\nVocê está atualmente em ${local.substring(0, 40)}`));
 
-  // Busca se existe uma loja na sala atual
-  const loja = await getLojaNaSala(15);
-  console.log(loja.rows[0].nome);
-
-  // Opções disponíveis no menu
-  const choices = outrasSalas.map(i => ({
-    name: `Ir para ${i.nome}`,
-    value: `mover_${i.id}`
-  }));
-
-  if (loja) {
-    choices.push({ name: `Visitar ${loja.rows[0].nome} (${loja.rows[0].tipo})`, value: `loja_${loja.rows[0].id}` });
+  if (outrasSalas.length > 0) {
+    console.log("\n🔹 Salas disponíveis para viajar:");
+    outrasSalas.forEach((sala, index) => {
+      console.log(`  ${index + 1}. ${sala.nome} (ID: ${sala.id})`);
+    });
+  } else {
+    console.log("\n⚠️ Nenhuma sala disponível para viajar.");
   }
 
-  choices.push({ name: 'Sair do jogo', value: 'exit' });
-  choices.push({ name: 'iniciar missao', value: 'iniciarmissao' });
-  choices.push({ name: 'completar missao', value: 'completarmissao' });
+  console.log("\n=== Escolha uma ação ===");
 
-  // Exibe o menu de ações para o jogador
   const answer = await select({
     message: "O que deseja fazer?",
-    choices
+    choices: [
+      ...outrasSalas.map(i => ({
+        name: `Ir para: ${i.nome.substring(0, 40).padEnd(20)}`,
+        value: i.id
+      })),
+      { name: "Exibir Status", value: "status" },
+      { name: "Listar personagens na sala", value: "listar_personagens" },
+      { name: "Visualizar Inventário", value: "inventory" },
+      { name: "Mostrar Mapa", value: "mapa" },
+      { name: "Sair do jogo", value: "exit" }
+    ],
   });
 
-  if (answer.startsWith('mover_')) {
-    const salaDestino = parseInt(answer.replace('mover_', ''));
-    await updatePlayerLocation(salaDestino, player.id);
+  if (answer === "status") {
+    taskQueue.enqueue(() => showPlayerStatus(player, walk));
+  } else if (answer === "mapa") {
+    // Primeiro, recupere o mundo atual do jogador
+    const currentWorldId = await getWorldByPlayerId(player.id);
+    await showMap(currentWorldId);
+    await input({ message: "Pressione Enter para continuar..." });
+    taskQueue.enqueue(() => walk(player));
+  } else if (answer === "inventory") {
+    await showInventory(player);
+    taskQueue.enqueue(() => walk(player));
+  } else if (answer === "listar_personagens") {
+    const inimigo = await listarPersonagens(player.id_sala);
+    if (inimigo) {
+      taskQueue.enqueue(() => iniciarCombate(player, inimigo));
+      taskQueue.enqueue(() => walk(player));
+    } else {
+      taskQueue.enqueue(() => walk(player));
+    }
+  } else if (answer === "exit") {
+    console.log("Saindo do jogo...");
+    process.exit(0);
+  } else {
+    const novasala_id = await updatePlayerLocation(answer, player.id);
+    player.id_sala = novasala_id;
     console.clear();
     taskQueue.enqueue(() => walk(player));
-  } else if (answer.startsWith('loja_')) {
-    const lojaId = parseInt(answer.replace('loja_', ''));
-    await comprarItem(player.id, lojaId);
-    taskQueue.enqueue(() => walk(player));
-     // Retorna à exploração após a compra
-    } else if (answer === 'iniciarmissao') {
-      await startMission(player.id, 1);
-      taskQueue.enqueue(() => walk(player));
-      
-    } else if (answer === 'completarmissao') {
-      await completeMission(player.id, 1);
-      taskQueue.enqueue(() => walk(player));
-      
-  } else if (answer === 'exit') {
-    console.log("Saindo...");
-    process.exit(0);
   }
 };
+
+
+const showInventory = async (player) => {
+  // Recupera os itens do inventário do banco de dados
+  const inventory = await getPlayerInventory(player.id);
+
+  if (!inventory || inventory.length === 0) {
+    console.log("Erro ao buscar inventário ou inventário vazio!");
+  } else {
+    console.log(chalk.bold.hex('#FFD700')("\n=== INVENTÁRIO DO JOGADOR ==="));
+    inventory.forEach((item, index) => {
+      console.log(`${index + 1}. ${item.nome} (Quantidade: ${item.quantidade})`);
+    });
+  }
+  // Obtém a capacidade atual do inventário (ex: 5/10)
+  const inventoryCapacity = await getPlayerInventoryCount(player.id);
+  console.log(`Capacidade: ${inventoryCapacity}/20`);
+
+  await input({ message: "Pressione Enter para continuar..." });
+};
+
+
 
 await welcome();
 taskQueue.enqueue(mainMenu);

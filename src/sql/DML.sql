@@ -17,7 +17,7 @@ VALUES
     (2, 'Exandria');
 
 
-INSERT INTO Regiao (id, id_mundo, nome, descricao, tipo_região)
+INSERT INTO Regiao (id, id_mundo, nome, descricao, tipo_regiao)
 VALUES
 -- Dungeons
     (1, 1, 'Cidadela Sem Sol', 'Uma antiga fortaleza enterrada sob o solo, lar de goblins e kobolds.', 'D'),
@@ -36,6 +36,8 @@ VALUES
     (10, 2, 'Neverwinter', 'Uma cidade mágica conhecida como a "Jóia do Norte".', 'C'),
     (11, 2, 'Silverymoon', 'Uma cidade élfica dedicada à magia e ao aprendizado.', 'C');
 
+-- Inferno
+    (66, 1, 'Inferno', 'Somente para os mortos.', 'D');
 
 INSERT INTO Salas (id, id_regiao, nome)
 VALUES
@@ -69,24 +71,84 @@ VALUES
 
 
 
+-- Inserções principais: Conexões internas e as interconexões básicas entre grupos
 INSERT INTO Caminhos (sala_origem, sala_destino)
 VALUES
--- Caminhos entre salas das Dungeons
-    (1, 2), -- Entrada da Cidadela -> Jardim do Crepúsculo
-    (3, 4), -- Corredor das Armadilhas -> Sala do Lich
-    (5, 6), -- Salão dos Guardiões Mortos -> Sarcófago da Rainha Lich
-    (7, 8), -- Sala da Batalha Infernal -> Trono de Bel
+  -- Conexões internas das Dungeons (salas 1 a 8)
+  (1, 2), (2, 1),
+  (2, 3), (3, 2),
+  (3, 4), (4, 3),
+  (4, 5), (5, 4),
+  (5, 6), (6, 5),
+  (6, 7), (7, 6),
+  (7, 8), (8, 7),
 
--- Caminhos entre salas das Florestas
-    (9, 10), -- Clareira dos Druidas -> Ruínas Élficas
-    (11, 12), -- Caverna da Ninfa -> Fonte do Sol Eterno
-    (13, 14), -- Passagem Sombria -> Templo Abandonado
+  -- Conexões internas das Florestas (salas 9 a 14)
+  (9, 10), (10, 9),
+  (10, 11), (11, 10),
+  (11, 12), (12, 11),
+  (12, 13), (13, 12),
+  (13, 14), (14, 13),
 
--- Caminhos entre salas das Cidades
-    (15, 16), -- Porto dos Mercadores -> Taverna Portal Bocejante
-    (17, 18), -- Mercado Central -> Fortaleza de Vigilantes
-    (19, 20), -- Palácio de Neverember -> Forja dos Mestres
-    (21, 22); -- Torre da Lua -> Biblioteca Mística
+  -- Conexões internas das Cidades (salas 15 a 22)
+  (15, 16), (16, 15),
+  (16, 17), (17, 16),
+  (17, 18), (18, 17),
+  (18, 19), (19, 18),
+  (19, 20), (20, 19),
+  (20, 21), (21, 20),
+  (21, 22), (22, 21),
+
+  -- Conexões básicas entre os grupos:
+  (8, 9), (9, 8),         -- Liga a última sala das Dungeons (8) com a primeira da Floresta (9)
+  (14, 15), (15, 14),      -- Liga a última sala das Florestas (14) com a primeira da Cidade (15)
+  (4, 17), (17, 4);        -- Conexão extra entre uma Dungeon (4) e uma Cidade (17)
+
+-- Inserções adicionais para que cada Dungeon tenha pelo menos uma conexão com uma Floresta e uma Cidade:
+INSERT INTO Caminhos (sala_origem, sala_destino)
+VALUES
+  -- Para Dungeon sala 1:
+  (1, 10), (10, 1),       -- Conexão com a Floresta (sala 10)
+  (1, 15), (15, 1),       -- Conexão com a Cidade (sala 15)
+
+  -- Para Dungeon sala 2:
+  (2, 11), (11, 2),       -- Conexão com a Floresta (sala 11)
+  (2, 16), (16, 2),       -- Conexão com a Cidade (sala 16)
+
+  -- Para Dungeon sala 3:
+  (3, 12), (12, 3),       -- Conexão com a Floresta (sala 12)
+  (3, 18), (18, 3),       -- Conexão com a Cidade (sala 18)
+
+  -- Para Dungeon sala 4:
+  (4, 13), (13, 4),       -- Conexão com a Floresta (sala 13)
+  -- (4, 17), (17, 4) já existem
+
+  -- Para Dungeon sala 5:
+  (5, 14), (14, 5),       -- Conexão com a Floresta (sala 14)
+  (5, 19), (19, 5),       -- Conexão com a Cidade (sala 19)
+
+  -- Para Dungeon sala 6:
+  (6, 9), (9, 6),         -- Conexão com a Floresta (sala 9)
+  (6, 20), (20, 6),       -- Conexão com a Cidade (sala 20)
+
+  -- Para Dungeon sala 7:
+  (7, 11), (11, 7),       -- Conexão com a Floresta (sala 11) – mesmo que já exista, reforça a ligação
+  (7, 21), (21, 7),       -- Conexão com a Cidade (sala 21)
+
+  -- Para Dungeon sala 8:
+  -- (8, 9) já existe (conexão com Floresta)
+  (8, 22), (22, 8);       -- Conexão com a Cidade (sala 22)
+
+-- Inserções adicionais para que cada Floresta tenha pelo menos uma conexão com uma Cidade:
+INSERT INTO Caminhos (sala_origem, sala_destino)
+VALUES
+  (9, 15), (15, 9),       -- Para a Floresta sala 9 conectar com Cidade (sala 15)
+  (10, 16), (16, 10),     -- Para a Floresta sala 10 conectar com Cidade (sala 16)
+  (11, 17), (17, 11),     -- Para a Floresta sala 11 conectar com Cidade (sala 17)
+  (12, 18), (18, 12),     -- Para a Floresta sala 12 conectar com Cidade (sala 18)
+  (13, 19), (19, 13);     -- Para a Floresta sala 13 conectar com Cidade (sala 19)
+-- (A Floresta sala 14 já está conectada à Cidade pelas conexões (14,15) e (15,14))
+
 
 INSERT INTO Raca (id, nome, is_hostil) 
 VALUES
@@ -266,9 +328,8 @@ VALUES
 
     -- Consumíveis
     (9, 'Poção de Cura', 'Consumivel'),
-    (10, 'Poção de Invisibilidade', 'Consumivel'),
-    (11, 'Poção de Força', 'Consumivel'),
-    (12, 'Elixir da Velocidade', 'Consumivel');
+    (10, 'Elixir Revigorante', 'Consumivel'),
+    (11, 'Néctar dos Deuses', 'Consumivel');
 
 INSERT INTO Armadura (id_item, defesa, resistencia, descricao)
 VALUES
@@ -278,10 +339,9 @@ VALUES
 
 INSERT INTO Consumível (id_item, Benefício, descricao)
 VALUES
-    (9, 10, 'Restaura + 2 pontos de vida ao usuário.'),
-    (10, 0, 'Torna o usuário invisível por até 1 hora ou até realizar uma ação ofensiva.'),
-    (11, 5, 'Aumenta temporariamente a força do usuário para 19 por 1 hora.'),
-    (12, 2, 'Dobra a velocidade de movimento e concede uma ação adicional por turno durante 1 minuto.');
+    (9, 80, 'Restaura 80 pontos de vida'),
+    (10, 60, 'Restaura 60 pontos de vida'),
+    (11, 40, 'Restaura 40 pontos de vida');
 
 INSERT INTO Arma (id_item, Dano, descricao)
 VALUES

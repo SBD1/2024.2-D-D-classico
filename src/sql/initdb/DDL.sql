@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS Regiao (
     id_mundo int NOT NULL,
     nome char(150) NOT NULL,
     descricao char(250) NOT NULL DEFAULT 'Sem Descrição',
-    tipo_região char(1) NOT NULL
+    tipo_regiao char(1) NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS Salas (
@@ -77,8 +77,7 @@ CREATE TABLE IF NOT EXISTS Loja (
 CREATE TABLE IF NOT EXISTS Inventario (
     id SERIAL PRIMARY KEY,
     id_pc int NOT NULL,
-    id_instancia_item int ,
-    capacidade int NOT NULL
+    id_instancia_item int
 );
 
 CREATE TABLE IF NOT EXISTS Venda (
@@ -161,6 +160,8 @@ CREATE TABLE IF NOT EXISTS Arma (
     Dano int NOT NULL,
     descricao varchar(500)
 );
+
+
 
 -- Criando a PROCEDURE para definir atributos com base na classe
 CREATE OR REPLACE PROCEDURE DefinirAtributosPorClasse(
@@ -248,10 +249,256 @@ END;
 $before_insert_personagem$ LANGUAGE plpgsql;
 
 -- Criando o TRIGGER para acionar a função antes da inserção
-CREATE TRIGGER before_insert_personagem_trigger
+CREATE OR REPLACE TRIGGER before_insert_personagem_trigger
 BEFORE INSERT ON Personagem
 FOR EACH ROW
 EXECUTE FUNCTION before_insert_personagem();
+
+CREATE OR REPLACE FUNCTION inserir_item_no_inventario()
+RETURNS TRIGGER AS $$
+DECLARE
+    v_qtd_itens INT;
+BEGIN
+    -- Verifica a quantidade de itens no inventário do personagem
+    SELECT COUNT(*) INTO v_qtd_itens
+    FROM inventario
+    WHERE id_pc = NEW.id_pc;
+
+    -- Se já houver 20 itens, exibe a mensagem de erro e impede a inserção
+    IF v_qtd_itens >= 20 THEN
+        RAISE EXCEPTION 'Seu inventário já está cheio';
+    ELSE
+        -- Se o limite não for atingido, permite a inserção
+        RETURN NEW;
+    END IF;
+END;
+$$ LANGUAGE plpgsql;
+
+
+
+CREATE OR REPLACE TRIGGER trigger_inserir_item_no_inventario
+    BEFORE INSERT ON inventario
+    FOR EACH ROW
+    EXECUTE FUNCTION inserir_item_no_inventario();
+
+
+ALTER TABLE Personagem
+ADD CONSTRAINT unique_nome UNIQUE (nome);
+
+
+-- TRIGGER: GARANTINDO GENERALIZAÇÃO/ESPECIALIZAÇÃO DE Item
+-- CREATE OR REPLACE FUNCTION item_generalizacao_especializacao()
+-- RETURNS TRIGGER AS $$
+-- BEGIN
+--     -- Generalização
+--     IF NEW.nome IS NULL THEN
+--         RAISE EXCEPTION 'Nome do item não pode ser nulo';
+--     END IF;
+
+--     IF NEW.tipo_item IS NULL THEN
+--         RAISE EXCEPTION 'Tipo do item não pode ser nulo';
+--     END IF;
+
+--     -- Especialização
+--     IF NEW.tipo_item = 'Armadura' THEN
+--         IF NOT (NEW.atributos ? 'defesa') THEN
+--             RAISE EXCEPTION 'Itens do tipo Armadura devem conter atributo de defesa';
+--         END IF;
+--     ELSIF NEW.tipo_item = 'Arma' THEN
+--         IF NOT (NEW.atributos ? 'dano') THEN
+--             RAISE EXCEPTION 'Itens do tipo Arma devem conter atributo de dano';
+--         END IF;
+--     ELSIF NEW.tipo_item = 'Consumivel' THEN
+--         IF NOT (NEW.atributos ? 'efeito') THEN
+--             RAISE EXCEPTION 'Itens do tipo Consumivel devem conter atributo de efeito';
+--         END IF;
+--     END IF;
+
+--     RETURN NEW;
+-- END;
+-- $$ LANGUAGE plpgsql;
+
+-- CREATE TRIGGER trg_item_generalizacao_especializacao
+-- BEFORE INSERT OR UPDATE ON Item
+-- FOR EACH ROW
+-- EXECUTE FUNCTION item_generalizacao_especializacao();
+
+
+-- TRIGGER: CAPACIDADE DO Inventario
+CREATE OR REPLACE FUNCTION inventario_valida_capacidade()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF (SELECT COUNT(*) FROM Inventario WHERE id_pc = NEW.id_pc) >= NEW.capacidade THEN
+        RAISE EXCEPTION 'Capacidade do inventário excedida';
+    END IF;
+
+    IF NEW.id_pc IS NULL THEN
+        RAISE EXCEPTION 'Inventário deve estar associado a um personagem';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_inventario_valida_capacidade
+BEFORE INSERT OR UPDATE ON Inventario
+FOR EACH ROW
+EXECUTE FUNCTION inventario_valida_capacidade();
+
+
+-- TRIGGER: SOMENTE INIMIGOS NA TABELA Loot
+CREATE OR REPLACE FUNCTION loot_somente_para_inimigos()
+RETURNS TRIGGER AS $$
+DECLARE
+    tipo_personagem tipo_personagem_enum;
+BEGIN
+    SELECT tipo_personagem INTO tipo_personagem
+    FROM Personagem
+    WHERE id = NEW.id_personagem;
+
+    IF tipo_personagem != 'Inimigo' THEN
+        RAISE EXCEPTION 'Apenas personagens do tipo "Inimigo" podem ter loot';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_loot_somente_para_inimigos
+BEFORE INSERT ON Loot
+FOR EACH ROW
+EXECUTE FUNCTION loot_somente_para_inimigos();
+
+
+-- TRIGGER: GARANTINDO GENERALIZAÇÃO/ESPECIALIZAÇÃO DE Regiao
+CREATE OR REPLACE FUNCTION regiao_valida_tipo()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.tipo_regiao NOT IN ('C', 'F', 'D') THEN
+        RAISE EXCEPTION 'Tipo de região inválido. Deve ser "C" (Cidade), "F" (Floresta) ou "D" (Dungeon)';
+    END IF;
+
+    IF NEW.tipo_regiao = 'C' THEN
+        IF NEW.descricao IS NULL THEN
+            RAISE EXCEPTION 'Cidades devem ter uma descrição preenchida.';
+        END IF;
+    ELSIF NEW.tipo_regiao = 'F' THEN
+        IF NEW.descricao IS NULL THEN
+            RAISE EXCEPTION 'Florestas devem ter uma descrição preenchida.';
+        END IF;
+    ELSIF NEW.tipo_regiao = 'D' THEN
+        IF NEW.descricao IS NULL THEN
+            RAISE EXCEPTION 'Dungeons devem ter uma descrição preenchida.';
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_regiao_valida_tipo
+BEFORE INSERT OR UPDATE ON Regiao
+FOR EACH ROW
+EXECUTE FUNCTION regiao_valida_tipo();
+
+
+-- TRIGGER: SEM Inimigos EM CIDADES
+CREATE OR REPLACE FUNCTION personagem_valida_regiao()
+RETURNS TRIGGER AS $$
+DECLARE
+    tipo_regiao CHAR(1);
+BEGIN
+    SELECT r.tipo_regiao INTO tipo_regiao
+    FROM Regiao r
+    INNER JOIN Salas s on s.id_regiao = r.id
+    WHERE s.id = NEW.id_sala;
+
+    IF NEW.tipo_personagem = 'Inimigo' AND tipo_regiao = 'C' THEN
+        RAISE EXCEPTION 'Personagens do tipo "Inimigo" não podem ser inseridos em regiões do tipo "Cidade"';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_personagem_valida_regiao
+BEFORE INSERT OR UPDATE ON Personagem
+FOR EACH ROW
+EXECUTE FUNCTION personagem_valida_regiao();
+
+
+-- TRIGGER: LEVA O Inimigo PARA O INFERNO
+CREATE OR REPLACE FUNCTION mover_personagem_sala_e_recuperar()
+RETURNS TRIGGER AS $$
+DECLARE
+    sala_aleatoria INTEGER;
+    nova_vida INTEGER;
+BEGIN
+    IF NEW.vida = 0 THEN
+        PERFORM set_config('sala_66_context', 'true', true);
+
+        UPDATE Personagem SET id_regiao = 66 WHERE id = NEW.id;
+
+        PERFORM pg_sleep(900);
+
+        nova_vida := FLOOR(RANDOM() * (100 - 50 + 1)) + 50;
+
+        SELECT id INTO sala_aleatoria
+        FROM Regiao
+        WHERE tipo_regiao IN ('D', 'F')
+        ORDER BY RANDOM() LIMIT 1;
+
+        UPDATE Personagem
+        SET vida = nova_vida, id_regiao = sala_aleatoria
+        WHERE id = NEW.id;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_mover_personagem_sala_e_recuperar
+BEFORE UPDATE ON Personagem
+FOR EACH ROW
+WHEN (OLD.vida > 0 AND NEW.vida = 0) -- Quando a vida mudar para 0
+EXECUTE FUNCTION mover_personagem_sala_e_recuperar();
+
+
+-- TRIGGER: O INFERNO É PARA OS MORTOS
+CREATE OR REPLACE FUNCTION bloquear_movimento_para_sala_66()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.id_regiao = 66 THEN
+        IF current_setting('sala_66_context', true) IS NULL THEN
+            RAISE EXCEPTION 'Movimento direto para a sala de id 66 não é permitido.';
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_bloquear_movimento_para_sala_66
+BEFORE INSERT OR UPDATE ON Personagem
+FOR EACH ROW
+WHEN (NEW.id_sala = 66) 
+EXECUTE FUNCTION bloquear_movimento_para_sala_66();
+
+CREATE OR REPLACE FUNCTION remover_pc_morto() 
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.tipo_personagem = 'PC' AND NEW.vida <= 0 THEN
+        DELETE FROM Personagem WHERE id = NEW.id;
+    END IF;
+    RETURN NULL; -- Retorna NULL porque o DELETE já removeu a linha
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_remover_pc_morto
+AFTER UPDATE OF vida ON Personagem
+FOR EACH ROW
+WHEN (NEW.vida <= 0 AND NEW.tipo_personagem = 'PC')
+EXECUTE FUNCTION remover_pc_morto();
 
 
 -- Keys

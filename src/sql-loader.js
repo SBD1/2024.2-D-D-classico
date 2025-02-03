@@ -15,7 +15,9 @@ export const seedDBTables = async () => {
     
     
     await transactions(async (poolClient) =>{
-      for (const command of commands) {                
+      for (const command of commands) {         
+        console.log(command);
+              
         await sleep(500);
         await poolClient.query(command);
         progressBar.increment(1);
