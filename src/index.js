@@ -8,6 +8,8 @@ import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByNam
 import taskQueue from './action-queue.js';
 import printDragon from './dragon.js';
 import chalk from 'chalk';
+import { chooseWorld, getWorldByPlayerId, getRandomSalaForWorld } from './worldRepository.js';
+import { showMap } from './map.entity.js';
 // import inquirer from 'inquirer'; 
 // import gradient from 'gradient-string';
 // import chalkAnimation from 'chalk-animation';
@@ -136,7 +138,8 @@ const registerPlayerOption = async () => {
       }
     }
   }
-
+  const worldId = await chooseWorld(); // o jogador escolhe o mundo
+  const randomSala = await getRandomSalaForWorld(worldId); // sala aleatória para o mundo escolhido
   let name;
   let playerCreated = false;
   while (!playerCreated) {
@@ -148,7 +151,7 @@ const registerPlayerOption = async () => {
 
     try {
       const playerData = {
-        id_sala: 1,
+        id_sala: randomSala.id,
         id_classe: parseInt(id_classe),
         nome: name,
         id_raca: parseInt(id_raca),
@@ -338,13 +341,20 @@ const walk = async (player) => {
       })),
       { name: "Exibir Status", value: "status" },
       { name: "Listar personagens na sala", value: "listar_personagens" },
+      { name: "Mostrar Mapa", value: "mapa" },
       { name: "Sair do jogo", value: "exit" }
     ],
   });
 
   if (answer === "status") {
     taskQueue.enqueue(() => showPlayerStatus(player, walk));
-  } else if (answer === "listar_personagens") {
+  } else if (answer === "mapa") {
+    // Primeiro, recupere o mundo atual do jogador
+    const currentWorldId = await getWorldByPlayerId(player.id);
+    await showMap(currentWorldId);
+    await input({ message: "Pressione Enter para continuar..." });
+    taskQueue.enqueue(() => walk(player));
+  }else if (answer === "listar_personagens") {
       const inimigo = await listarPersonagens(player.id_sala);
     if (inimigo) {
       taskQueue.enqueue(() => iniciarCombate(player, inimigo));
@@ -361,6 +371,7 @@ const walk = async (player) => {
     console.clear();
     taskQueue.enqueue(() => walk(player));  
   }
+  
 };
 
 await welcome();
