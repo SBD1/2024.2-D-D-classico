@@ -1,6 +1,6 @@
 import { select, input } from '@inquirer/prompts';
 import { getPlayerGold, updatePlayerGold, addItemToInventory } from './playerRepository.js';
-import { getLojaItens, updateLojaEstoque,getLojas } from './lojaRepository.js';
+import { getLojaItens, updateLojaEstoque, getLojas } from './lojaRepository.js';
 import chalk from 'chalk';
 import promptSync from 'prompt-sync';
 const prompt = promptSync();
@@ -10,9 +10,9 @@ function showDialogue(text) {
   console.log(text);
   prompt('Pressione Enter para continuar...');
 }
-export const comprarItem = async (playerId,lojaId) => {
+export const comprarItem = async (playerId, lojaId) => {
   console.log(playerId)
-  
+
   // 2️⃣ Buscar itens da loja
   const itens = await getLojaItens(lojaId);
   if (itens.length === 0) {
@@ -35,13 +35,13 @@ export const comprarItem = async (playerId,lojaId) => {
   }
 
   // 4️⃣ Jogador escolhe a quantidade
-  
+
   // 5️⃣ Verificar se o jogador tem ouro suficiente
-  
-  const custoTotal = item.preco ;
+
+  const custoTotal = item.preco;
 
   if (playerGold < custoTotal) {
-    console.log(chalk.red("Você não tem ouro suficiente!"));
+    showDialogue(chalk.red("Você não tem ouro suficiente!"));
     return;
   }
 
@@ -54,17 +54,17 @@ export const comprarItem = async (playerId,lojaId) => {
   }
   try {
     await addItemToInventory(playerId, itemId);
-    showDialogue(chalk.green(`Compra realizada com sucesso! Você comprou ${item.nome}.`)); 
+    showDialogue(chalk.green(`Compra realizada com sucesso! Você comprou ${item.nome}.`));
   } catch (error) {
     console.error('Erro ao adicionar item ao inventário:', error);
     return;
-    
+
   }
   try {
     await updateLojaEstoque(lojaId, itemId, quantidade);
   } catch (error) {
-     console.error('Erro ao atualizar estoque do item:', error);
-     return;
+    console.error('Erro ao atualizar estoque do item:', error);
+    return;
   }
-  
+
 };
