@@ -4,7 +4,7 @@ import { connect } from './db-connection.js';
 import { needSeedTable, seedDBTables } from './sql-loader.js';
 import { select, input } from '@inquirer/prompts';
 import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation, getPlayerLocal } from './entities/personagem.entity.js'
-import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByName, getEntitiesInRoom, getPlayerInventory, getPlayerInventoryCount } from './playerRepository.js';
+import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByName, getEntitiesInRoom, getPlayerInventory, getPlayerInventoryCount, salvarPersonagem } from './playerRepository.js';
 import taskQueue from './action-queue.js';
 import printDragon from './dragon.js';
 import chalk from 'chalk';
@@ -237,7 +237,7 @@ const iniciarCombate = async (jogador, inimigo) => {
   if (!inimigo?.id) {
     throw new Error("Inimigo sem ID válido!");
   }
-  
+
   console.clear();
   console.log(`⚔️ Combate contra ${inimigo.nome} (Nível ${inimigo.nivel}) ⚔️\n`);
 
@@ -290,11 +290,11 @@ const iniciarCombate = async (jogador, inimigo) => {
   } else {
     console.log(`🎉 ${inimigo.nome} foi derrotado!`);
     console.log(`Você ganhou ${inimigo.xp_base} XP e ${inimigo.gold} gold!`);
-    
+
     // Atualiza jogador
     jogador.xp_base += inimigo.xp_base;
     jogador.gold += inimigo.gold;
-    
+
     // Level up simples
     if (jogador.xp_base >= 100 * jogador.nivel) {
       jogador.nivel++;
@@ -320,7 +320,7 @@ const walk = async (player) => {
   const local = await getPlayerLocal(player.id);
 
   console.clear();
-  console.log(chalk.bold.hex('#FFD700')(`\nVocê está atualmente em ${local.substring(0,40)}`));
+  console.log(chalk.bold.hex('#FFD700')(`\nVocê está atualmente em ${local.substring(0, 40)}`));
 
   if (outrasSalas.length > 0) {
     console.log("\n🔹 Salas disponíveis para viajar:");
@@ -337,7 +337,7 @@ const walk = async (player) => {
     message: "O que deseja fazer?",
     choices: [
       ...outrasSalas.map(i => ({
-        name: `Ir para: ${i.nome.substring(0,40).padEnd(20)}`,
+        name: `Ir para: ${i.nome.substring(0, 40).padEnd(20)}`,
         value: i.id
       })),
       { name: "Exibir Status", value: "status" },
@@ -359,8 +359,8 @@ const walk = async (player) => {
   } else if (answer === "inventory") {
     await showInventory(player);
     taskQueue.enqueue(() => walk(player));
-  }else if (answer === "listar_personagens") {
-      const inimigo = await listarPersonagens(player.id_sala);
+  } else if (answer === "listar_personagens") {
+    const inimigo = await listarPersonagens(player.id_sala);
     if (inimigo) {
       taskQueue.enqueue(() => iniciarCombate(player, inimigo));
       taskQueue.enqueue(() => walk(player));

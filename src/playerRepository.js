@@ -165,23 +165,20 @@ export const getPlayerInventoryCount = async (playerId) => {
     }
 };
 
-    return await executeQuery(query, [roomId]);
-  };
-
-  export const salvarPersonagem = async (personagem) => {
-    try{
-      await executeQuery(
-        `UPDATE Personagem
+export const salvarPersonagem = async (personagem) => {
+    try {
+        await executeQuery(
+            `UPDATE Personagem
          SET nivel = $1, 
              vida = $2, 
              xp_base = $3, 
              gold = $4 
          WHERE id = $5`,
-        [personagem.nivel, personagem.vida, personagem.xp_base, personagem.gold, personagem.id]
-      );
-  
+            [personagem.nivel, personagem.vida, personagem.xp_base, personagem.gold, personagem.id]
+        );
+
     } catch (error) {
-      console.error("Erro ao salvar personagem:", error);
-      throw error;
+        console.error("Erro ao salvar personagem:", error);
+        throw error;
     }
-  };
+};
