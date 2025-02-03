@@ -322,6 +322,27 @@ VALUES
     (10, 'Elixir Revigorante', 'Consumivel'),
     (11, 'Néctar dos Deuses', 'Consumivel');
 
+INSERT INTO Venda (id, id_loja, id_item, preco, quantidade)
+VALUES
+    (1, 1, 1, 20, 30),  -- O Alforge do Destino, Armadura de Couro
+    (2, 1, 3, 30, 30),  -- O Alforge do Destino, Armadura de Malha
+    (3, 1, 2, 50, 30),  -- O Alforge do Destino, Armadura de Placa
+    (4, 2, 5, 80, 30),   -- Forja do Dragão, Espada Longa
+    (5, 2, 6, 80, 30),   -- Forja do Dragão, Arco Longo
+    (6, 3, 3, 30, 30),   -- Mercado das Maravilhas, Armadura de Malha
+    (7, 3, 2, 50, 30),   -- Mercado das Maravilhas, Armadura de Placa
+    (8, 4, 9, 80, 30),   -- Laboratório Místico, Poção de Cura
+    (9, 4, 10, 60, 30),   -- Laboratório Místico, Elixir Revigorante
+    (10, 4, 11, 40, 30),   -- Laboratório Místico, Néctar dos Deuses
+    (11, 5, 7, 120, 30),  -- Aço Glorioso, Machado de Batalha
+    (12, 5, 8, 50, 30),  -- Aço Glorioso, Cajado Mágico
+    (13, 6, 10, 60, 30), -- Poções do Norte, Elixir Revigorante
+    (14, 6, 11, 40, 30), -- Poções do Norte, Néctar dos Deuses
+    (15, 7, 3, 200, 30),  -- Tesouros de Silverymoon, Armadura de Malha
+    (16, 7, 2, 50, 30),  -- Tesouros de Silverymoon, Armadura de Placa
+    (17, 8, 7, 120, 30);  -- A Lâmina Reluzente, Machado de Batalha
+
+
 INSERT INTO Armadura (id_item, defesa, resistencia, descricao)
 VALUES
     (1, 11, 0, 'Armadura leve feita de couro endurecido. Oferece alta mobilidade.'),
