@@ -19,7 +19,7 @@ export async function completeMission(playerId, missionId) {
     //await client.query('UPDATE player_missions SET status = $1 WHERE player_id = $2 AND mission_id = $3', ['completed', playerId, missionId]);
     await client.query('UPDATE personagem SET gold = gold + $1 WHERE id = $2', [mission.rows[0].recompensa_gold, playerId]);
     if (mission.rows[0].recompensa) {
-        await client.query('INSERT INTO inventario (id_pc, id_instancia_item, capacidade) VALUES ($1, $2, 1) ON CONFLICT (id_pc, id_instancia_item) DO UPDATE SET capacidade = inventario.capacidade + 1', [playerId, mission.rows[0].recompensa]);
+        await client.query('INSERT INTO inventario (id_pc, id_instancia_item) VALUES ($1, $2)', [playerId, mission.rows[0].recompensa]);
     }
     showDialogue('Mission completed!');
 }

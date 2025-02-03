@@ -344,16 +344,17 @@ const walk = async (player) => {
     name: `Ir para ${i.nome}`,
     value: `${i.id}`
   }));
-  choices.push({name: "Exibir Status", value: "status" });
-  choices.push({ name:"Listar personagens na sala", value: "listar_personagens" });
-  choices.push({ name:"Visualizar Inventário", value: "inventory"});
-  choices.push({ name:"Mostrar Mapa", value: "mapa" });
-  choices.push({ name: 'Sair do jogo', value: 'exit' });
   if (loja && loja.length > 0) {
     loja.forEach(l => {
       choices.push({ name: `Visitar ${l.nome} (${l.tipo})`, value: `loja_${l.id}` });
     });
   }
+  choices.push({name: "Exibir Status", value: "status" });
+  choices.push({ name:"Listar personagens na sala", value: "listar_personagens" });
+  choices.push({ name:"Visualizar Inventário", value: "inventory"});
+  choices.push({ name:"Mostrar Mapa", value: "mapa" });
+  choices.push({ name: 'Sair do jogo', value: 'exit' });
+  
   
  
   const answer = await select({

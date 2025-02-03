@@ -71,12 +71,12 @@ export const getPlayerGold = async (playerId) => {
     
   };
   
-  export const addItemToInventory = async (playerId, itemId, quantidade) => {
+  export const addItemToInventory = async (playerId, itemId) => {
     try {// Adiciona um novo item ao inventário
             return client.query(`
-              INSERT INTO Inventario (id_pc, id_instancia_item, capacidade) 
-              VALUES ($1, $2, $3)
-            `, [playerId, itemId, quantidade]);
+              INSERT INTO Inventario (id_pc, id_instancia_item) 
+              VALUES ($1, $2)
+            `, [playerId, itemId]);
     } catch (error) {
         console.error('Erro ao adicionar item ao inventário:', error);
         return;
@@ -154,8 +154,7 @@ export const getPlayerInventory = async (playerId) => {
         const res = await client.query(
             `SELECT it.nome AS nome, COUNT(inv.id_instancia_item) AS quantidade
              FROM inventario inv
-             JOIN inst_item ii ON inv.id_instancia_item = ii.id
-             JOIN item it ON ii.id_item = it.id
+             JOIN item it ON inv.id_instancia_item = it.id
              WHERE inv.id_pc = $1
              GROUP BY it.nome`,
             [playerId]

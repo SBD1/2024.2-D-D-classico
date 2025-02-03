@@ -325,7 +325,7 @@ ADD CONSTRAINT unique_nome UNIQUE (nome);
 
 
 -- TRIGGER: CAPACIDADE DO Inventario
-CREATE OR REPLACE FUNCTION inventario_valida_capacidade()
+/*CREATE OR REPLACE FUNCTION inventario_valida_capacidade()
 RETURNS TRIGGER AS $$
 BEGIN
     IF (SELECT COUNT(*) FROM Inventario WHERE id_pc = NEW.id_pc) >= NEW.capacidade THEN
@@ -343,7 +343,7 @@ $$ LANGUAGE plpgsql;
 CREATE TRIGGER trg_inventario_valida_capacidade
 BEFORE INSERT OR UPDATE ON Inventario
 FOR EACH ROW
-EXECUTE FUNCTION inventario_valida_capacidade();
+EXECUTE FUNCTION inventario_valida_capacidade();*/
 
 
 -- TRIGGER: SOMENTE INIMIGOS NA TABELA Loot
@@ -524,7 +524,7 @@ ALTER TABLE Dialogo ADD CONSTRAINT "FK_19" FOREIGN KEY (missao) REFERENCES Missa
 ALTER TABLE Armadura ADD CONSTRAINT "FK_20" FOREIGN KEY (id_item) REFERENCES Item (id);
 ALTER TABLE Consumível ADD CONSTRAINT "FK_21" FOREIGN KEY (id_item) REFERENCES Item (id);
 ALTER TABLE Arma ADD CONSTRAINT "FK_22" FOREIGN KEY (id_item) REFERENCES Item (id);
-ALTER TABLE Inventario ADD CONSTRAINT "FK_23" FOREIGN KEY (id_instancia_item) REFERENCES Inst_Item (id);
+ALTER TABLE Inventario ADD CONSTRAINT "FK_23" FOREIGN KEY (id_instancia_item) REFERENCES Item (id);
 ALTER TABLE Personagem ADD CONSTRAINT "FK_24" FOREIGN KEY (id_raca) REFERENCES Raca (id);
 ALTER TABLE Loot ADD CONSTRAINT "FK_25" FOREIGN KEY (id_personagem) REFERENCES Personagem(id);
 ALTER TABLE Regristo_batalha ADD CONSTRAINT "FK_26" FOREIGN KEY (id_PC) REFERENCES Personagem (id);
