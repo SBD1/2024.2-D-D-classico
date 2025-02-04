@@ -486,10 +486,12 @@ DECLARE
 BEGIN
     SELECT r.tipo_regiao INTO tipo_regiao
     FROM Regiao r
-    INNER JOIN Salas s on s.id_regiao = r.id
+    INNER JOIN Salas s ON s.id_regiao = r.id
     WHERE s.id = NEW.id_sala;
 
-    IF NEW.tipo_personagem = 'Inimigo' AND tipo_regiao = 'C' THEN
+    RAISE NOTICE 'Novo tipo_regiao: %, Novo tipo_personagem: %', tipo_regiao, NEW.tipo_personagem;
+
+    IF NEW.tipo_personagem = 'Inimigo' AND TRIM(tipo_regiao) = 'C' THEN
         RAISE EXCEPTION 'Personagens do tipo "Inimigo" não podem ser inseridos em regiões do tipo "Cidade"';
     END IF;
 
