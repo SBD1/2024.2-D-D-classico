@@ -287,63 +287,139 @@ ADD CONSTRAINT unique_nome UNIQUE (nome);
 
 
 -- TRIGGER: GARANTINDO GENERALIZAÇÃO/ESPECIALIZAÇÃO DE Item
--- CREATE OR REPLACE FUNCTION item_generalizacao_especializacao()
--- RETURNS TRIGGER AS $$
--- BEGIN
---     -- Generalização
---     IF NEW.nome IS NULL THEN
---         RAISE EXCEPTION 'Nome do item não pode ser nulo';
---     END IF;
-
---     IF NEW.tipo_item IS NULL THEN
---         RAISE EXCEPTION 'Tipo do item não pode ser nulo';
---     END IF;
-
---     -- Especialização
---     IF NEW.tipo_item = 'Armadura' THEN
---         IF NOT (NEW.atributos ? 'defesa') THEN
---             RAISE EXCEPTION 'Itens do tipo Armadura devem conter atributo de defesa';
---         END IF;
---     ELSIF NEW.tipo_item = 'Arma' THEN
---         IF NOT (NEW.atributos ? 'dano') THEN
---             RAISE EXCEPTION 'Itens do tipo Arma devem conter atributo de dano';
---         END IF;
---     ELSIF NEW.tipo_item = 'Consumivel' THEN
---         IF NOT (NEW.atributos ? 'efeito') THEN
---             RAISE EXCEPTION 'Itens do tipo Consumivel devem conter atributo de efeito';
---         END IF;
---     END IF;
-
---     RETURN NEW;
--- END;
--- $$ LANGUAGE plpgsql;
-
--- CREATE TRIGGER trg_item_generalizacao_especializacao
--- BEFORE INSERT OR UPDATE ON Item
--- FOR EACH ROW
--- EXECUTE FUNCTION item_generalizacao_especializacao();
-
-
--- TRIGGER: CAPACIDADE DO Inventario
-/*CREATE OR REPLACE FUNCTION inventario_valida_capacidade()
+CREATE OR REPLACE FUNCTION check_specialized_item()
 RETURNS TRIGGER AS $$
+DECLARE
+    item_tipo tipo_item_enum;
 BEGIN
-    IF (SELECT COUNT(*) FROM Inventario WHERE id_pc = NEW.id_pc) >= NEW.capacidade THEN
-        RAISE EXCEPTION 'Capacidade do inventário excedida';
+    IF TG_OP = 'UPDATE' AND OLD.id_item != NEW.id_item THEN
+        RAISE EXCEPTION 'Não é permitido alterar o id_item na tabela %.', TG_TABLE_NAME;
     END IF;
 
-    IF NEW.id_pc IS NULL THEN
-        RAISE EXCEPTION 'Inventário deve estar associado a um personagem';
+    IF NOT EXISTS (SELECT 1 FROM Item WHERE id = NEW.id_item) THEN
+        RAISE EXCEPTION 'Item % não existe na tabela Item.', NEW.id_item;
+    END IF;
+
+    SELECT tipo_item INTO item_tipo FROM Item WHERE id = NEW.id_item;
+
+    CASE TG_TABLE_NAME
+        WHEN 'armadura' THEN
+            IF item_tipo != 'Armadura' THEN
+                RAISE EXCEPTION 'Item % não é do tipo Armadura (tipo atual: %).', NEW.id_item, item_tipo;
+            END IF;
+        WHEN 'consumível' THEN
+            IF item_tipo != 'Consumível' THEN
+                RAISE EXCEPTION 'Item % não é do tipo Consumível (tipo atual: %).', NEW.id_item, item_tipo;
+            END IF;
+        WHEN 'arma' THEN
+            IF item_tipo != 'Arma' THEN
+                RAISE EXCEPTION 'Item % não é do tipo Arma (tipo atual: %).', NEW.id_item, item_tipo;
+            END IF;
+        ELSE
+            RAISE EXCEPTION 'Tabela desconhecida: %', TG_TABLE_NAME;
+    END CASE;
+
+    IF EXISTS (
+        SELECT 1 
+        FROM (
+            SELECT id_item FROM Armadura WHERE id_item = NEW.id_item
+            UNION ALL
+            SELECT id_item FROM Consumível WHERE id_item = NEW.id_item
+            UNION ALL
+            SELECT id_item FROM Arma WHERE id_item = NEW.id_item
+        ) AS specialized
+        WHERE id_item = NEW.id_item
+        AND (TG_OP = 'INSERT' OR TG_TABLE_NAME != TG_RELNAME)
+        LIMIT 1
+    ) THEN
+        RAISE EXCEPTION 'Item % já está em outra tabela especializada.', NEW.id_item;
     END IF;
 
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_inventario_valida_capacidade
-BEFORE INSERT OR UPDATE ON Inventario
+CREATE TRIGGER trg_armadura_check_before
+BEFORE INSERT OR UPDATE ON Armadura
 FOR EACH ROW
-EXECUTE FUNCTION inventario_valida_capacidade();*/
+EXECUTE FUNCTION check_specialized_item();
+
+CREATE TRIGGER trg_consumivel_check_before
+BEFORE INSERT OR UPDATE ON Consumível
+FOR EACH ROW
+EXECUTE FUNCTION check_specialized_item();
+
+CREATE TRIGGER trg_arma_check_before
+BEFORE INSERT OR UPDATE ON Arma
+FOR EACH ROW
+EXECUTE FUNCTION check_specialized_item();
+
+-- TRIGGER: GARANTIR ITEM EM TABELA CERTO
+CREATE OR REPLACE FUNCTION check_item_total_specialization()
+RETURNS TRIGGER AS $$
+DECLARE
+    expected_table TEXT;
+    actual_table TEXT;
+BEGIN
+    SELECT 
+        CASE 
+            WHEN EXISTS (SELECT 1 FROM Armadura WHERE id_item = NEW.id) THEN 'Armadura'
+            WHEN EXISTS (SELECT 1 FROM Consumível WHERE id_item = NEW.id) THEN 'Consumível'
+            WHEN EXISTS (SELECT 1 FROM Arma WHERE id_item = NEW.id) THEN 'Arma'
+            ELSE NULL
+        END INTO actual_table;
+
+    IF actual_table IS NULL THEN
+        RAISE EXCEPTION 'Item % não está em nenhuma tabela especializada.', NEW.id;
+    END IF;
+
+    IF NEW.tipo_item::TEXT != actual_table THEN
+        RAISE EXCEPTION 'Tipo do item % (%) não corresponde à tabela especializada (%).', 
+            NEW.id, NEW.tipo_item, actual_table;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE CONSTRAINT TRIGGER trg_item_check_total_specialization
+AFTER INSERT OR UPDATE ON Item
+DEFERRABLE INITIALLY DEFERRED
+FOR EACH ROW
+EXECUTE FUNCTION check_item_total_specialization();
+
+
+-- TRIGGER PARA EVITAR UPDATE NO TIPO DO ITEM CASO ELE ESTEJA EM UMA TABELA ESPECIFICA
+CREATE OR REPLACE FUNCTION prevent_invalid_type_change()
+RETURNS TRIGGER AS $$
+DECLARE
+    actual_table TEXT;
+BEGIN
+    IF NEW.tipo_item != OLD.tipo_item THEN
+        SELECT 
+            CASE 
+                WHEN EXISTS (SELECT 1 FROM Armadura WHERE id_item = OLD.id) THEN 'Armadura'
+                WHEN EXISTS (SELECT 1 FROM Consumível WHERE id_item = OLD.id) THEN 'Consumível'
+                WHEN EXISTS (SELECT 1 FROM Arma WHERE id_item = OLD.id) THEN 'Arma'
+                ELSE NULL
+            END INTO actual_table;
+
+        IF actual_table IS NOT NULL AND actual_table != NEW.tipo_item::TEXT THEN
+            RAISE EXCEPTION 'Alteração do tipo_item para % inválida. Remova o item da tabela % antes.', 
+                NEW.tipo_item, actual_table;
+        END IF;
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+
+CREATE TRIGGER trg_item_prevent_invalid_type_change
+BEFORE UPDATE ON Item
+FOR EACH ROW
+EXECUTE FUNCTION prevent_invalid_type_change();
 
 
 -- TRIGGER: SOMENTE INIMIGOS NA TABELA Loot
