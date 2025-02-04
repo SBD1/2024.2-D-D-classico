@@ -503,63 +503,6 @@ FOR EACH ROW
 EXECUTE FUNCTION personagem_valida_regiao();
 
 
--- TRIGGER: LEVA O Inimigo PARA O INFERNO
-CREATE OR REPLACE FUNCTION mover_personagem_sala_e_recuperar()
-RETURNS TRIGGER AS $$
-DECLARE
-    sala_aleatoria INTEGER;
-    nova_vida INTEGER;
-BEGIN
-    IF NEW.vida = 0 THEN
-        PERFORM set_config('sala_66_context', 'true', true);
-
-        UPDATE Personagem SET id_regiao = 66 WHERE id = NEW.id;
-
-        PERFORM pg_sleep(900);
-
-        nova_vida := FLOOR(RANDOM() * (100 - 50 + 1)) + 50;
-
-        SELECT id INTO sala_aleatoria
-        FROM Regiao
-        WHERE tipo_regiao IN ('D', 'F')
-        ORDER BY RANDOM() LIMIT 1;
-
-        UPDATE Personagem
-        SET vida = nova_vida, id_regiao = sala_aleatoria
-        WHERE id = NEW.id;
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_mover_personagem_sala_e_recuperar
-BEFORE UPDATE ON Personagem
-FOR EACH ROW
-WHEN (OLD.vida > 0 AND NEW.vida = 0) -- Quando a vida mudar para 0
-EXECUTE FUNCTION mover_personagem_sala_e_recuperar();
-
-
--- TRIGGER: O INFERNO É PARA OS MORTOS
-CREATE OR REPLACE FUNCTION bloquear_movimento_para_sala_66()
-RETURNS TRIGGER AS $$
-BEGIN
-    IF NEW.id_regiao = 66 THEN
-        IF current_setting('sala_66_context', true) IS NULL THEN
-            RAISE EXCEPTION 'Movimento direto para a sala de id 66 não é permitido.';
-        END IF;
-    END IF;
-
-    RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
-CREATE TRIGGER trg_bloquear_movimento_para_sala_66
-BEFORE INSERT OR UPDATE ON Personagem
-FOR EACH ROW
-WHEN (NEW.id_sala = 66) 
-EXECUTE FUNCTION bloquear_movimento_para_sala_66();
-
 CREATE OR REPLACE FUNCTION remover_pc_morto() 
 RETURNS TRIGGER AS $$
 BEGIN
