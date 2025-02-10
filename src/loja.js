@@ -17,6 +17,7 @@ export const comprarItem = async (playerId, lojaId) => {
   const itens = await getLojaItens(lojaId);
   if (itens.length === 0) {
     console.log(chalk.red("Esta loja não tem itens à venda."));
+    await input({ message: "Pressione Enter para continuar..." });
     return;
   }
   const playerGold = await getPlayerGold(playerId);

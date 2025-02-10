@@ -297,3 +297,55 @@ export const equiparItem = async (playerId, itemId) => {
     // Remove o item da tabela de equipamentos
     await client.query("DELETE FROM Personagem_Equipamento WHERE id_personagem = $1 AND id_item = $2", [playerId, itemId]);
   };
+
+  export const usarConsumivel = async (playerId, itemId) => {
+    try {
+      // 1. Buscar informações do consumível no inventário:
+      // Fazemos join com as tabelas item e Consumivel para obter o valor do benefício.
+      const res = await client.query(
+        `SELECT it.nome, it.tipo_item, c.benefício as beneficio
+         FROM inventario inv
+         JOIN item it ON inv.id_instancia_item = it.id
+         JOIN consumível c ON it.id = c.id_item
+         WHERE inv.id_pc = $1 AND it.id = $2
+         LIMIT 1`,
+        [playerId, itemId]
+      );
+  
+      if (res.rows.length === 0) {
+        console.log("Consumível não encontrado no inventário.");
+        return;
+      }
+  
+      const consumivel = res.rows[0];
+  
+      // 2. Verifica se o item é do tipo 'Consumivel'
+      if (consumivel.tipo_item !== 'Consumivel') {
+        console.log("Esse item não é um consumível.");
+        return;
+      }
+  
+      // 3. Atualiza a vida do personagem
+      await client.query(
+        `UPDATE Personagem SET vida = vida + $1 WHERE id = $2`,
+        [consumivel.beneficio, playerId]
+      );
+      console.log(`Você usou ${consumivel.nome} e recuperou ${consumivel.beneficio} pontos de vida!`);
+  
+      // 4. Atualiza o inventário: diminui a quantidade ou remove o item
+      await client.query(
+        `WITH to_delete AS (
+            SELECT id 
+            FROM inventario 
+            WHERE id_pc = $1 AND id_instancia_item = $2 
+            LIMIT 1
+         )
+         DELETE FROM inventario
+         WHERE id IN (SELECT id FROM to_delete)`,
+        [playerId, itemId]
+      );
+    } catch (error) {
+      console.error("Erro ao usar consumível:", error);
+    }
+  };
+  
