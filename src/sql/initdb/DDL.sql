@@ -173,7 +173,15 @@ CREATE OR REPLACE PROCEDURE DefinirAtributosPorClasse(
     OUT p_constituicao INT,
     OUT p_sabedoria INT,
     OUT p_inteligencia INT
-) 
+);
+
+CREATE TABLE IF NOT EXISTS Personagem_Equipamento (
+    id SERIAL PRIMARY KEY,
+    id_personagem INT NOT NULL,
+    id_item INT NOT NULL,
+    FOREIGN KEY (id_personagem) REFERENCES Personagem(id),
+    FOREIGN KEY (id_item) REFERENCES Item(id)
+);
 AS $DefinirAtributosPorClasse$
 BEGIN
     -- Definir valores padrão

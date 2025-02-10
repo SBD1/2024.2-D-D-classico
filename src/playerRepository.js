@@ -1,5 +1,12 @@
 import client from './db-connection.js';
 import { executeQuery } from './db-connection.js';
+import promptSync from 'prompt-sync';
+const prompt = promptSync();
+
+function showDialogue(text) {
+    console.log(text);
+    
+}
 
 export const insertPlayerToDB = async (playerData) => {
     const query = `
@@ -152,11 +159,13 @@ export const getEnemiesInRoom = async (roomId) => {
 export const getPlayerInventory = async (playerId) => {
     try {
         const res = await client.query(
-            `SELECT it.nome AS nome, COUNT(inv.id_instancia_item) AS quantidade
+            `SELECT it.id,it.nome AS nome, 
+                    it.tipo_item AS tipo_item, 
+                    COUNT(inv.id_instancia_item) AS quantidade
              FROM inventario inv
              JOIN item it ON inv.id_instancia_item = it.id
              WHERE inv.id_pc = $1
-             GROUP BY it.nome`,
+             GROUP BY it.nome, it.tipo_item ,it.id`,
             [playerId]
         );
 
@@ -191,7 +200,14 @@ export const getPlayerInventoryCount = async (playerId) => {
         return null;
     }
 };
-
+export const getPlayerEquippedItems = async (playerId) => {
+    return client.query(`
+      SELECT i.id, i.nome, i.tipo_item
+      FROM Personagem_Equipamento pe
+      JOIN Item i ON pe.id_item = i.id
+      WHERE pe.id_personagem = $1
+    `, [playerId]);
+  };
 export const salvarPersonagem = async (personagem) => {
     try {
         await executeQuery(
@@ -210,3 +226,74 @@ export const salvarPersonagem = async (personagem) => {
     }
 };
 
+export const equiparItem = async (playerId, itemId) => {
+  
+  
+    // Verifica se o item está no inventário do jogador
+    const item = await client.query(`
+      SELECT i.id, i.nome, i.tipo_item, a.dano, ar.defesa
+      FROM Inventario inv
+      JOIN Item i ON inv.id_instancia_item = i.id
+      LEFT JOIN Arma a ON i.id = a.id_item
+      LEFT JOIN Armadura ar ON i.id = ar.id_item
+      WHERE inv.id_pc = $1 AND i.id = $2
+    `, [playerId, itemId]);
+  
+    if (!item) {
+      showDialogue("Item não encontrado no inventário."); 
+      return;
+    }
+    
+    // Verifica se o item já está equipado
+    const equipado = await client.query(`
+      SELECT id FROM Personagem_Equipamento WHERE id_personagem = $1 AND id_item = $2
+    `, [playerId, itemId]);
+    if (equipado.rows.length > 0) {  // Agora verificamos se o array tem itens
+        showDialogue("Este item já está equipado!"); 
+        return;
+      }
+  
+    
+    // Atualiza os atributos do personagem
+    if (item.rows[0].tipo_item === 'Arma') {
+      await client.query("UPDATE Personagem SET forca = forca + $1 WHERE id = $2", [item.rows[0].dano, playerId]);
+      showDialogue(`Você equipou a arma ${item.rows[0].nome}. Seu dano aumentou em ${item.rows[0].dano}!`); 
+      
+    } else if (item.rows[0].tipo_item === 'Armadura') {
+      await client.query("UPDATE Personagem SET constituicao = constituicao + $1 WHERE id = $2", [item.rows[0].defesa, playerId]);
+      showDialogue(`Você equipou a armadura ${item.rows[0].nome}. Sua defesa aumentou em ${item.rows[0].defesa}!`); 
+  
+    } 
+  
+    // Adiciona o item à tabela de equipamentos
+    await client.query("INSERT INTO Personagem_Equipamento (id_personagem, id_item) VALUES ($1, $2)", [playerId, itemId]);
+  };
+
+  export const desequiparItem = async (playerId, itemId) => {
+    
+  
+    // Verifica se o item está equipado
+    const item = await client.query(`
+      SELECT i.id, i.nome, i.tipo_item, a.dano, ar.defesa
+      FROM Personagem_Equipamento pe
+      JOIN Item i ON pe.id_item = i.id
+      LEFT JOIN Arma a ON i.id = a.id_item
+      LEFT JOIN Armadura ar ON i.id = ar.id_item
+      WHERE pe.id_personagem = $1 AND i.id = $2
+    `, [playerId, itemId]);
+  
+    if (!item) {
+      showDialogue("Este item não está equipado."); 
+      return;
+    }
+  
+    // Reduz os atributos ao remover o item
+    if (item.rows[0].tipo_item === 'Arma') {
+      await client.query("UPDATE Personagem SET forca = forca - $1 WHERE id = $2", [item.rows[0].dano, playerId]);
+    } else if (item.rows[0].tipo_item === 'Armadura') {
+      await client.query("UPDATE Personagem SET constituicao = constituicao - $1 WHERE id = $2", [item.rows[0].defesa, playerId]);
+    }
+  
+    // Remove o item da tabela de equipamentos
+    await client.query("DELETE FROM Personagem_Equipamento WHERE id_personagem = $1 AND id_item = $2", [playerId, itemId]);
+  };

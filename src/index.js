@@ -6,13 +6,23 @@ import { getLojaNaSala } from './lojaRepository.js';
 import { needSeedTable, seedDBTables } from './sql-loader.js';
 import { select, input } from '@inquirer/prompts';
 import { registerPlayer, getPlayerCurrentLocation, updatePlayerLocation, getPlayerLocal } from './entities/personagem.entity.js'
-import { insertPlayerToDB, getRacas, getClasses, getPlayerStatus, getPlayerByName, getEnemiesInRoom, getPlayerInventory, getPlayerInventoryCount, salvarPersonagem } from './playerRepository.js';
+import { insertPlayerToDB, getRacas, getClasses,getPlayerEquippedItems, getPlayerStatus, getPlayerByName, getEnemiesInRoom, getPlayerInventory, getPlayerInventoryCount, salvarPersonagem } from './playerRepository.js';
 import taskQueue from './action-queue.js';
 import printDragon from './dragon.js';
 import chalk from 'chalk';
 import { startMission,completeMission } from './missao.js';
 import { chooseWorld, getWorldByPlayerId, getRandomSalaForWorld } from './worldRepository.js';
 import { showMap } from './map.entity.js';
+import { equiparItem, desequiparItem } from './playerRepository.js';
+
+import promptSync from 'prompt-sync';
+const prompt = promptSync();
+
+function showDialogue(text) {
+    console.log(text);
+}
+
+
 // import inquirer from 'inquirer'; 
 // import gradient from 'gradient-string';
 // import chalkAnimation from 'chalk-animation';
@@ -352,7 +362,8 @@ const walk = async (player) => {
   choices.push({ name:"Mostrar Mapa", value: "mapa" });
   choices.push({ name: 'Sair do jogo', value: 'exit' });
   
-  
+  choices.push({ name: 'Equipar Item', value: 'equipar'  });
+  choices.push({ name: 'Desequipar Item', value: 'desequipar'});
  
   const answer = await select({
     message: "O que deseja fazer?",
@@ -385,6 +396,15 @@ const walk = async (player) => {
   } else if (answer === "exit") {
     console.log("Saindo do jogo...");
     process.exit(0);
+  } 
+  else if (answer === 'equipar') {
+    const itemId = await input({ message: 'Digite o ID do item para equipar:', required: true });
+    await equiparItem(player.id, parseInt(itemId));
+    taskQueue.enqueue(() => walk(player));
+  } else if (answer === 'desequipar') {
+    const itemId = await input({ message: 'Digite o ID do item para desequipar:', required: true });
+    await desequiparItem(player.id, parseInt(itemId));
+    taskQueue.enqueue(() => walk(player));
   } else {
     const novasala_id = await updatePlayerLocation(answer, player.id);
     player.id_sala = novasala_id;
@@ -395,24 +415,95 @@ const walk = async (player) => {
 
 
 const showInventory = async (player) => {
-  // Recupera os itens do inventário do banco de dados
+  // Recupera os itens do inventário do jogador
   const inventory = await getPlayerInventory(player.id);
 
   if (!inventory || inventory.length === 0) {
-    console.log("Erro ao buscar inventário ou inventário vazio!");
+    console.log(chalk.red("Erro ao buscar inventário ou inventário vazio!"));
+    await input({ message: "Pressione Enter para continuar..." });
   } else {
-    console.log(chalk.bold.hex('#FFD700')("\n=== INVENTÁRIO DO JOGADOR ==="));
-    inventory.forEach((item, index) => {
-      console.log(`${index + 1}. ${item.nome} (Quantidade: ${item.quantidade})`);
-    });
-  }
-  // Obtém a capacidade atual do inventário (ex: 5/10)
-  const inventoryCapacity = await getPlayerInventoryCount(player.id);
-  console.log(`Capacidade: ${inventoryCapacity}/20`);
+    // Recupera os itens atualmente equipados
+    const equippedItems = await getPlayerEquippedItems(player.id);
+    
+    // Monta o menu de seleção
+    const choices = inventory.map((item, index) => {
+      // Verifica se o item está equipado (compara pelo id)
+      const isEquipped = equippedItems.rows.some(e => e.id === item.id);
+     
 
-  await input({ message: "Pressione Enter para continuar..." });
+      return {
+        name: `${index + 1}. ${item.nome} (Qtd: ${item.quantidade}) ${isEquipped ? '[Equipado]' : ''}`,
+        value: item.id,
+        // Também podemos incluir o tipo para facilitar as verificações posteriores
+        tipo_item: item.tipo_item 
+      };
+    });
+    // Adiciona uma opção para voltar ou sair
+    choices.push({ name: 'Voltar', value: 'voltar' });
+
+    console.log(chalk.bold.hex('#FFD700')("\n=== INVENTÁRIO DO JOGADOR ==="));
+    // Exibe a capacidade do inventário
+    const inventoryCapacity = await getPlayerInventoryCount(player.id);
+    console.log(`Capacidade: ${inventoryCapacity}/20`);
+
+    // Solicita que o jogador selecione um item
+    const answer = await select({
+      message: "Selecione um item para equipar/desequipar:",
+      choices
+    });
+
+    if (answer === 'voltar') {
+      return; // Volta ao menu anterior
+    }
+
+    // Identifica o item selecionado (buscando no array de choices ou no inventário)
+    const selectedItem = choices.find(c => c.value === answer);
+    if (!selectedItem) {
+      showDialogue(chalk.red("Item inválido.")); 
+      return;
+    }
+
+    // Verifica se o item já está equipado
+    const isAlreadyEquipped = equippedItems.rows.some(e => e.id === selectedItem.value);
+
+    if (isAlreadyEquipped) {
+      // Desequipar se o item já estiver equipado
+      await desequiparItem(player.id, selectedItem.value);
+      showDialogue(chalk.green(`${selectedItem.name} foi desequipado.`)); 
+
+    } else {
+      // Se for para equipar, verificar restrições: apenas 1 arma e 1 armadura simultaneamente
+
+      if (selectedItem.tipo_item === 'Arma') {
+        // Verifica se já existe uma arma equipada
+        if (equippedItems.rows.some(e => e.tipo_item === 'Arma')) {
+          showDialogue(chalk.red("Você já possui uma arma equipada! Desequipe-a antes de equipar outra."));
+          await input({ message: "Pressione Enter para continuar..." });
+          
+          // Opcional: retornar ou permitir que o jogador tente novamente
+          return;
+        }
+      }
+      if (selectedItem.tipo_item === 'Armadura') {
+        // Verifica se já existe uma armadura equipada
+        if (equippedItems.rows.some(e => e.tipo_item === 'Armadura')) {
+          showDialogue(chalk.red("Você já possui uma armadura equipada! Desequipe-a antes de equipar outra.")); 
+          await input({ message: "Pressione Enter para continuar..." });
+          return;
+        }
+      }
+
+      // Se passar nas verificações, equipa o item
+      await equiparItem(player.id, selectedItem.value);
+      showDialogue(chalk.green(`${selectedItem.name} foi equipado.`)); 
+    }
+
+    // Aguarda uma confirmação para continuar
+    await input({ message: "Pressione Enter para continuar..." });
+  }
 };
 
+export default showInventory;
 
 
 await welcome();
