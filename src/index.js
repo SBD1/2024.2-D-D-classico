@@ -301,7 +301,7 @@ const iniciarCombate = async (jogador, inimigo) => {
     await salvarPersonagem(jogador);
     process.exit(0);
   } else {
-    await updateMissionProgressOnEnemyDefeat(jogador.id, 2);
+    await updateMissionProgressOnEnemyDefeat(jogador.id, inimigo.id_raca);
     console.log(`🎉 ${inimigo.nome} foi derrotado!`);
     console.log(`Você ganhou ${inimigo.xp_base} XP e ${inimigo.gold} gold!`);
 

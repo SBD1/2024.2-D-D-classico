@@ -137,7 +137,8 @@ export const getPlayerByName = async (playerName) => {
 export const getEnemiesInRoom = async (roomId) => {
     const query = `
       SELECT 
-        id, 
+        id,
+        id_raca, 
         nome,
         tipo_personagem,
         nivel,
