@@ -109,6 +109,7 @@ CREATE TABLE IF NOT EXISTS Raca (
 
 CREATE TABLE IF NOT EXISTS Missao (
     id SERIAL PRIMARY KEY,
+    kills_requeridas int NOT NULL DEFAULT 0,
     recompensa int NOT NULL,
     id_raca int NOT NULL,
     titulo char(100) NOT NULL,
@@ -132,6 +133,8 @@ CREATE TABLE IF NOT EXISTS Loot (
 
 CREATE TABLE IF NOT EXISTS Inst_Missao (
     id SERIAL PRIMARY KEY,
+    progresso int NOT NULL DEFAULT 0,
+    status varchar(20) NOT NULL DEFAULT 'ativa',
     missao int NOT NULL,
     id_personagem int NOT NULL
 );
