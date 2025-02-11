@@ -17,16 +17,11 @@
 
 
 ## Apresentação Módulo 3: 
+### Apresentação 3:
 [Confira aqui](https://youtu.be/4WYHhC0aF8w)
-
-
 [![alt text](/2024.2-D-D-classico/imagens/image2.png)](https://youtu.be/4WYHhC0aF8w)
 
 
-
-
-## Apresentação Módulo 3: 
+### Apresentação Final: 
 [Confira aqui](https://youtu.be/6zJ_6hmWDjk)
-
-
 [![alt text](/2024.2-D-D-classico/imagens/thumb.png)](https://youtu.be/6zJ_6hmWDjk)
