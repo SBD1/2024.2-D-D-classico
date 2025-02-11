@@ -10,7 +10,7 @@ import { insertPlayerToDB, getRacas, getClasses,getPlayerEquippedItems, getPlaye
 import taskQueue from './action-queue.js';
 import printDragon from './dragon.js';
 import chalk from 'chalk';
-import { startMission,completeMission } from './missao.js';
+import { startMission,completeMission,updateMissionProgressOnEnemyDefeat,getMissionsForCity, getMissionDialogues, acceptMission } from './missao.js';
 import { chooseWorld, getWorldByPlayerId, getRandomSalaForWorld } from './worldRepository.js';
 import { showMap } from './map.entity.js';
 import { equiparItem, desequiparItem,usarConsumivel } from './playerRepository.js';
@@ -301,6 +301,7 @@ const iniciarCombate = async (jogador, inimigo) => {
     await salvarPersonagem(jogador);
     process.exit(0);
   } else {
+    await updateMissionProgressOnEnemyDefeat(jogador.id, 2);
     console.log(`🎉 ${inimigo.nome} foi derrotado!`);
     console.log(`Você ganhou ${inimigo.xp_base} XP e ${inimigo.gold} gold!`);
 
@@ -357,13 +358,12 @@ const walk = async (player) => {
     });
   }
   choices.push({name: "Exibir Status", value: "status" });
-  choices.push({ name:"Ver inimigos na sala", value: "listar_inimigos" });
+  choices.push({ name:"Ver inimigos na sala", value: "listar_inimigos" })
+  choices.push({ name:"Ver Missões", value: "listar_missões" });
   choices.push({ name:"Visualizar Inventário", value: "inventory"});
   choices.push({ name:"Mostrar Mapa", value: "mapa" });
   choices.push({ name: 'Sair do jogo', value: 'exit' });
   
-  choices.push({ name: 'Equipar Item', value: 'equipar'  });
-  choices.push({ name: 'Desequipar Item', value: 'desequipar'});
  
   const answer = await select({
     message: "O que deseja fazer?",
@@ -393,19 +393,14 @@ const walk = async (player) => {
     } else {
       taskQueue.enqueue(() => walk(player));
     }
+  } else if (answer === "listar_missões") {
+    await checkCityMissions(player);
+    taskQueue.enqueue(() => walk(player));
   } else if (answer === "exit") {
     console.log("Saindo do jogo...");
     process.exit(0);
   } 
-  else if (answer === 'equipar') {
-    const itemId = await input({ message: 'Digite o ID do item para equipar:', required: true });
-    await equiparItem(player.id, parseInt(itemId));
-    taskQueue.enqueue(() => walk(player));
-  } else if (answer === 'desequipar') {
-    const itemId = await input({ message: 'Digite o ID do item para desequipar:', required: true });
-    await desequiparItem(player.id, parseInt(itemId));
-    taskQueue.enqueue(() => walk(player));
-  } else {
+ else {
     const novasala_id = await updatePlayerLocation(answer, player.id);
     player.id_sala = novasala_id;
     console.clear();
@@ -433,7 +428,7 @@ const showInventory = async (player) => {
     if (item.tipo_item !== 'Consumivel') {
       const isEquipped = equippedItems.rows.some(e => e.id === item.id);
       if (isEquipped) {
-        displayName += " [Equipado]";
+        displayName += chalk.green("[Equipado]");
       }
     }
     return { 
@@ -499,7 +494,63 @@ const showInventory = async (player) => {
 };
 
 export default showInventory;
-
+export const checkCityMissions = async (player) => {
+  // Supondo que player.id_sala contenha o ID da cidade atual
+  const missions = await getMissionsForCity(player.id_sala);
+  
+  if (!missions || missions.length === 0) {
+    console.log("Nenhuma missão disponível nesta cidade.");
+    await input({ message: "Pressione Enter para continuar..." });
+    return;
+  }
+  
+  // Cria um menu para escolher uma missão (se houver mais de uma)
+  const missionChoices = missions.map(m => ({
+    name: `${m.titulo} - ${m.objetivo}`,
+    value: m.id
+  }));
+  
+  // Adiciona opção para não aceitar nenhuma missão
+  missionChoices.push({ name: 'Não aceitar missão', value: 'none' });
+  
+  const chosenMissionId = await select({
+    message: "Missões disponíveis nesta cidade:",
+    choices: missionChoices
+  });
+  
+  if (chosenMissionId === 'none') {
+    console.log("Nenhuma missão foi aceita.");
+    await input({ message: "Pressione Enter para continuar..." });
+    return;
+  }
+  
+  // Exibe os diálogos da missão
+  const dialogues = await getMissionDialogues(chosenMissionId);
+  
+  console.log(chalk.bold.green("\n--- Diálogo da Missão ---"));
+  for (const dialogue of dialogues) {
+    console.log(chalk.blue(dialogue.conteudo));
+    await input({ message: "Pressione Enter para continuar..." });
+  }
+  
+  // Pergunta se o jogador deseja aceitar a missão
+  const accept = await select({
+    message: "Deseja aceitar essa missão?",
+    choices: [
+      { name: "Sim", value: true },
+      { name: "Não", value: false }
+    ]
+  });
+  
+  if (accept) {
+    await acceptMission(player.id, chosenMissionId);
+    console.log(chalk.green("Missão aceita! Boa sorte."));
+    await input({ message: "Pressione Enter para continuar..." });
+  } else {
+    console.log("Missão recusada.");
+    await input({ message: "Pressione Enter para continuar..." });
+  }
+};
 
 
 await welcome();
@@ -522,6 +573,7 @@ while (true) {
     process.exit(1);
   }
 }
+
 
 
 
